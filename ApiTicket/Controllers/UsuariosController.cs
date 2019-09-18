@@ -28,12 +28,5 @@ namespace ApiForum.Controllers
             var Core = new UsuarioCore(usuario, _contexto).LogarUsuario();
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
-        //Chamando o metodo de listar todos da core 
-        [HttpGet]
-        public IActionResult ListarTodos()
-        {
-            var Core = new UsuarioCore(_contexto).Listar();
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
-        }
     }
 }
