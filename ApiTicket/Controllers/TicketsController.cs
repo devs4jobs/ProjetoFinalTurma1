@@ -22,7 +22,7 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{TicketID}")]
       
         public IActionResult GetIdTicket([FromHeader]string Usertoken, string TicketID)
         {

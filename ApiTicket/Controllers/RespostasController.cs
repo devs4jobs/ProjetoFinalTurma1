@@ -23,21 +23,21 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{TicketId}")]
         public IActionResult GetIdTicket(string TokenAutor, string TicketId)
         {
             var Core = new RespostaCore(_contexto).BuscarRespostas(TokenAutor, TicketId);
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{TicketId}")]
         public IActionResult AtualizarTicketId(string TokenAutor, string TicketId, Resposta resposta)
         {
             var Core = new RespostaCore(_contexto).EditarResposta(TokenAutor, TicketId, resposta);
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{TicketId}")]
         public IActionResult DeletarTicketId([FromHeader]string TokenAutor, string TicketId)
         {
             var Core = new RespostaCore(_contexto).DeletarResposta(TokenAutor, TicketId);
