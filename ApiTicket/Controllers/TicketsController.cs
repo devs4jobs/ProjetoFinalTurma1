@@ -16,9 +16,9 @@ namespace ApiForum.Controllers
 
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
-        public IActionResult CadastrarTicket([FromBody] Ticket ticket)
+        public IActionResult CadastrarTicket([FromBody] Ticket ticket, [FromHeader] string Usertoken)
         {
-            var Core = new TicketCore(ticket, _contexto).CadastrarTicket();
+            var Core = new TicketCore(ticket, _contexto).CadastrarTicket(Usertoken);
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 
@@ -38,17 +38,17 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult AtualizarTicketId([FromHeader]string Usertoken, string TicketID)
+        [HttpPut("{TicketID}")]
+        public IActionResult AtualizarTicketId([FromHeader]string Usertoken, string TicketID,[FromBody] Ticket ticket)
         {
-            var Core = new TicketCore(_contexto).AtualizarTicket(Usertoken, TicketID);
+            var Core = new TicketCore(_contexto).AtualizarTicket(Usertoken, TicketID, ticket);
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeletarTicketId([FromHeader]string Usertoken)
+        [HttpDelete("{TicketID}")]
+        public IActionResult DeletarTicketId([FromHeader]string Usertoken, string TicketID)
         {
-            var Core = new TicketCore(_contexto).DeletarTicket(Usertoken);
+            var Core = new TicketCore(_contexto).DeletarTicket(Usertoken, TicketID);
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
     }
