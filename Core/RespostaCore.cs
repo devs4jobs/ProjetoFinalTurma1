@@ -73,7 +73,7 @@ namespace Core
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta editada com sucesso!" } };
         }
 
-        public Retorno DeletarReposta(string tokenAutor, string ticketId)
+        public Retorno DeletarResposta(string tokenAutor, string ticketId)
         {
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
