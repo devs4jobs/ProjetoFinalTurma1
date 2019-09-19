@@ -10,6 +10,9 @@ namespace Model
         public Usuario Cliente { get; set; }
         [ForeignKey("Usuarios")]
         public Guid? ClienteId { get; set; }
+        public Usuario Atendente { get; set; }
+        [ForeignKey("Usuarios")]
+        public Guid? AtendenteId { get; set; }
         public List<Resposta> LstRespostas { get; set; }
         public Status? Status { get; set; } 
         public string Titulo { get; set; } 
