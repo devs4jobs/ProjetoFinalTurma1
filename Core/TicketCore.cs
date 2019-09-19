@@ -120,10 +120,11 @@ namespace Core
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
             if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
-            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
-            if (cliente.Id != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
-
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID));
+            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
+            if (cliente.Id != TicketSolicitado.ClienteId) return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+
+           
             return TicketSolicitado != null? new Retorno {Status = true , Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
         }
