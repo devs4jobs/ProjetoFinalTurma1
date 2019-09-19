@@ -15,7 +15,7 @@ namespace Core
     public class TicketCore : AbstractValidator<Ticket>
     {
         private IMapper _mapper { get; set; }
-        private Ticket _ticket;
+        private Ticket _ticket { get; set; }
         private ServiceContext _serviceContext { get; set; }
 
         #region Construtores
@@ -52,6 +52,7 @@ namespace Core
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext)) 
                  return new Retorno {Status = false, Resultado = new List<string>{"Autorização Negada!"} } ;
+            
             //verifico ticket se é valido.
             var validar = Validate(_ticket);
             if (!validar.IsValid) 
@@ -59,10 +60,10 @@ namespace Core
 
             //busco o cliente na base e verifico.
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == _ticket.ClienteId);
-            if (cliente == null)  return new Retorno {Status = false, Resultado = new List<string>{"Cliente não identificado!"}} ;
+            if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
+            if (cliente.Tipo != "CLIENTE") return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é do tipo cliente" } };
 
-            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
-            if (cliente.Id != Guid.Parse(Usertoken))  return new Retorno {Status = false, Resultado = new List<string>{"Autorização Negada!"} } ;
+            _ticket.ClienteId = cliente.Id;
 
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
