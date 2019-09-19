@@ -56,7 +56,8 @@ namespace Core
             var Resultado = new
             {
                 TokenUsuario = usuarioLogin.Id,
-                usuarioLogin.Nome
+                usuarioLogin.Nome,
+                usuarioLogin.Tipo
             };
 
             return new Retorno { Status = true, Resultado = Resultado };
