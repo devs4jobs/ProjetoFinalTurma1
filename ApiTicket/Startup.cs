@@ -20,11 +20,17 @@ namespace ApiTicket
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().AddJsonOptions(options => {
+                options.SerializerSettings.DateFormatString = "dd/MM/yyyy";
+                options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                    });
             services.AddDbContext<ServiceContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StringConexao")), ServiceLifetime.Scoped);
             services.AddSwaggerGen(s =>
             {
                 s.SwaggerDoc("v1", new Info { Title = "Ticket Api", Version = "v1" });
             });
+
+          
 
             var config = new MapperConfiguration(cfg =>
             {
@@ -32,12 +38,14 @@ namespace ApiTicket
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
                     .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
                     .ForMember(dest => dest.ClienteId, opt => opt.Ignore())
-                    .ForMember(dest => dest.lstRespostas, opt => opt.Ignore())
+                    .ForMember(dest => dest.LstRespostas, opt => opt.Ignore())
                     .ForMember(dest => dest.Avaliacao, opt => opt.Condition(ori => ori.Avaliacao != null))
                     .ForMember(dest => dest.Status, opt => opt.Condition(ori => ori.Status != null))
                     .ForMember(dest => dest.Tipo, opt => opt.Condition(ori => ori.Titulo != null))
                     .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null));
             });
+            IMapper mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -23,12 +23,15 @@ namespace Core
             RuleFor(u => u.Senha).NotNull().Length(8, 12).WithMessage("A senha deve ser entre 8 e 12 caracteres e nao pode ser nula");
             RuleFor(u => u.Senha).Matches(@"[a-z-A-Z].\d|\d.[a-z-A-Z]").WithMessage("A senha deve conter ao menos uma letra e um número");
             RuleFor(u => u.ConfirmaSenha).Equal(_usuario.Senha).WithMessage("As senhas devem ser iguais!");
+            RuleFor(u => u.Tipo).NotNull().WithMessage("O tipo do Usuario deve ser informado");
+            if(_usuario.Tipo!=null) RuleFor(u => u.Tipo).Must(u => u.ToUpper() == "CLIENTE" || u.ToUpper() == "ATENDENTE").WithMessage("Tipo deve ser cliente ou atendente");
         }
 
         //Método para cadastro de usuario
         public Retorno CadastrarUsuario()
         {
             var valida = Validate(_usuario);
+
             if (!valida.IsValid)
                 return new Retorno { Status = false, Resultado = valida.Errors.Select(a => a.ErrorMessage).ToList() };
 
@@ -36,7 +39,9 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
 
             _dbcontext.Usuarios.Add(_usuario);
+
             _dbcontext.SaveChanges();
+
             return new Retorno { Status = true, Resultado = new List<string> { "Usuário cadastrado com sucesso!" } };
         }
 
@@ -57,6 +62,5 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = Resultado };
         }
-        public Retorno Listar() => new Retorno { Status = true, Resultado = _dbcontext.Usuarios.ToList() };
     }
 }
