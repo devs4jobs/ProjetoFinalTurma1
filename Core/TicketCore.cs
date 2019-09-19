@@ -32,9 +32,6 @@ namespace Core
             _ticket = ticket;
             _serviceContext = serviceContext;
 
-            RuleFor(t => t.ClienteId).NotNull()
-                .WithMessage("O ID do cliente não pode ser nulo.");
-
             RuleFor(t => t.Titulo).NotNull()
                 .WithMessage("O título do ticket não pode ser nulo.");
 
@@ -50,20 +47,24 @@ namespace Core
         public Retorno CadastrarTicket(string Usertoken)
         {
             //verifico login.
-            if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext)) 
+            if (!Autorizacao.GuidValidation(Usertoken)) 
                  return new Retorno {Status = false, Resultado = new List<string>{"Autorização Negada!"} } ;
             //verifico ticket se é valido.
             var validar = Validate(_ticket);
             if (!validar.IsValid) 
                  return new Retorno {Status = false, Resultado = validar.Errors.Select(e => e.ErrorMessage).ToList() } ;
 
+            _ticket.ClienteId = Guid.Parse(Usertoken);
+
             //busco o cliente na base e verifico.
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == _ticket.ClienteId);
-            if (cliente == null)  return new Retorno {Status = false, Resultado = new List<string>{"Cliente não identificado!"}} ;
+            if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
-            if (cliente.Id != Guid.Parse(Usertoken))  return new Retorno {Status = false, Resultado = new List<string>{"Autorização Negada!"} } ;
+            if (cliente.Tipo != "CLIENTE")
+                return new Retorno { Status = false, Resultado = new List<string> { "Usuário não é do tipo cliente impossível cadastrar um ticket." } };
 
+
+            _ticket.NumeroTicket = ConvertNumeroTickets();
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
             _serviceContext.SaveChanges();
@@ -161,14 +162,14 @@ namespace Core
                 new Retorno { Status = true, Resultado = todos.Where(t => t.ClienteId == cliente.Id).ToList() } 
                 : new Retorno { Status = false, Resultado = new List<string> { $"{cliente.Nome} você não fez nenhum ticket." } };
         }
-        public static string ConvertNumeroTickets()
+         public string ConvertNumeroTickets()
         {
             var random = new Random();
             var dataString = DateTime.Now.ToString("MMyyyy", CultureInfo.CreateSpecificCulture("pt-BR")); ;
-            var number = 7 * random.Next(1000,9999) / 100;
+            var number = 7 * random.Next(1000, 9999) / 100;
 
             if (number == 0)
-                number = 6 * random.Next(1000,9999) /100;
+                number = 6 * random.Next(1000, 9999) / 100;
 
 
             return dataString + number.ToString("D");
