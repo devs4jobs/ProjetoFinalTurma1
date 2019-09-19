@@ -29,10 +29,9 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            var valida = Validate(_resposta);
-
-            if (!valida.IsValid)
-                return new Retorno { Status = false, Resultado = valida.Errors.Select(a => a.ErrorMessage).ToList() };
+            var validar = Validate(_resposta);
+            if (!validar.IsValid)
+                return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
 
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta enviada!" } };
         }
@@ -42,10 +41,10 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            if (!Guid.TryParse(id, out Guid ident))
+            if (!Autorizacao.GuidValidation(id))
                 return new Retorno { Status = false, Resultado = new List<string> { "Id do ticket inválido" } };
 
-            var todasRespostas = _serviceContext.Respostas.Where(r => r.Id == ident).ToList();
+            var todasRespostas = _serviceContext.Respostas.Where(r => r.Id == Guid.Parse(id)).ToList();
 
             return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = todasRespostas };
         }
