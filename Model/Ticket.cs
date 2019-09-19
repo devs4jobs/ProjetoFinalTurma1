@@ -6,8 +6,9 @@ namespace Model
 {
     public class Ticket : Base
     {
-        public int NumeroTicket { get; set; }
+        public string NumeroTicket { get; set; }
         public Usuario Cliente { get; set; }
+        [ForeignKey("Usuarios")]
         public Guid? ClienteId { get; set; }
         public List<Resposta> LstRespostas { get; set; }
         public Status? Status { get; set; } 
