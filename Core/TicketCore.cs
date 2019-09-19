@@ -5,6 +5,7 @@ using Core.Util;
 using System;
 using System.Collections.Generic;
 using AutoMapper;
+using System.Globalization;
 
 namespace Core
 {
@@ -159,6 +160,18 @@ namespace Core
             return todos.Where(t => t.ClienteId == cliente.Id).ToList().Count() > 0 ?
                 new Retorno { Status = true, Resultado = todos.Where(t => t.ClienteId == cliente.Id).ToList() } 
                 : new Retorno { Status = false, Resultado = new List<string> { $"{cliente.Nome} você não fez nenhum ticket." } };
+        }
+        public static string ConvertNumeroTickets()
+        {
+            var random = new Random();
+            var dataString = DateTime.Now.ToString("MMyyyy", CultureInfo.CreateSpecificCulture("pt-BR")); ;
+            var number = 7 * random.Next(1000,9999) / 100;
+
+            if (number == 0)
+                number = 6 * random.Next(1000,9999) /100;
+
+
+            return dataString + number.ToString("D");
         }
     }
 }

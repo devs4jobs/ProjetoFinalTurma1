@@ -41,7 +41,7 @@ namespace ApiTicket
                     .ForMember(dest => dest.LstRespostas, opt => opt.Ignore())
                     .ForMember(dest => dest.Avaliacao, opt => opt.Condition(ori => ori.Avaliacao != null))
                     .ForMember(dest => dest.Status, opt => opt.Condition(ori => ori.Status != null))
-                    .ForMember(dest => dest.Tipo, opt => opt.Condition(ori => ori.Titulo != null))
+                    .ForMember(dest => dest.Tipo, opt => opt.Condition(ori => ori.Tipo != null))
                     .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null));
             });
             IMapper mapper = config.CreateMapper();

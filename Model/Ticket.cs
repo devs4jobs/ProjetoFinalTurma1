@@ -7,7 +7,7 @@ namespace Model
 {
     public class Ticket : Base
     {
-        public int NumeroTicket { get; set; }
+        public string NumeroTicket { get; set; }
         public Usuario Cliente { get; set; }
         public Guid? ClienteId { get; set; }
         [NotMapped]
