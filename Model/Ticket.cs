@@ -8,6 +8,7 @@ namespace Model
     {
         public string NumeroTicket { get; set; }
         public Usuario Cliente { get; set; }
+        [ForeignKey("Usuarios")]
         public Guid? ClienteId { get; set; }
         public List<Resposta> LstRespostas { get; set; }
         public Status? Status { get; set; } 
