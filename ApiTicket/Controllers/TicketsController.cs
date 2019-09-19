@@ -18,39 +18,39 @@ namespace ApiForum.Controllers
 
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
-        public IActionResult CadastrarTicket([FromBody] Ticket ticket, [FromHeader] string Usertoken)
+        public IActionResult CadastrarTicket([FromBody] Ticket ticket, [FromHeader] string autorToken)
         {
-            var Core = new TicketCore(ticket, _contexto).CadastrarTicket(Usertoken);
+            var Core = new TicketCore(ticket, _contexto).CadastrarTicket(autorToken);
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
         }
 
         [HttpGet("{TicketID}")]
       
-        public IActionResult GetIdTicket([FromHeader]string Usertoken, string TicketID)
+        public IActionResult GetIdTicket([FromHeader]string autorToken, string TicketID)
         {
-            var Core = new TicketCore(_contexto).BuscarTicketporID(Usertoken, TicketID);
+            var Core = new TicketCore(_contexto).BuscarTicketporID(autorToken, TicketID);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         //Chamando o metodo de listar todos da core 
         [HttpGet]
-        public IActionResult GetTodosTickets([FromHeader]string Usertoken)
+        public IActionResult GetTodosTickets([FromHeader]string autorToken)
         {
-            var Core = new TicketCore(_contexto).BuscarTodosTickets(Usertoken);
+            var Core = new TicketCore(_contexto).BuscarTodosTickets(autorToken);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         [HttpPut("{TicketID}")]
-        public IActionResult AtualizarTicketId([FromHeader]string Usertoken, string TicketID,[FromBody] Ticket ticket)
+        public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID,[FromBody] Ticket ticket)
         {
-            var Core = new TicketCore(_Mapper,_contexto).AtualizarTicket(Usertoken, TicketID, ticket);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new TicketCore(_Mapper,_contexto).AtualizarTicket(autorToken, TicketID, ticket);
+            return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);
         }
 
         [HttpDelete("{TicketID}")]
-        public IActionResult DeletarTicketId([FromHeader]string Usertoken, string TicketID)
+        public IActionResult DeletarTicketId([FromHeader]string autorToken, string TicketID)
         {
-            var Core = new TicketCore(_contexto).DeletarTicket(Usertoken, TicketID);
+            var Core = new TicketCore(_contexto).DeletarTicket(autorToken, TicketID);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
     }

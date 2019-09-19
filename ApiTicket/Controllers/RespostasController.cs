@@ -18,30 +18,30 @@ namespace ApiForum.Controllers
 
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
-        public IActionResult CadastrarTicket([FromBody] Resposta resposta, [FromHeader] string autorToken)
+        public IActionResult CadastrarResposta([FromBody] Resposta resposta, [FromHeader] string autorToken)
         {
             var Core = new RespostaCore(resposta, _contexto).CadastrarResposta(autorToken);
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core): (IActionResult)Ok(Core);
         }
 
         [HttpGet("{TicketId}")]
-        public IActionResult GetIdTicket(string TokenAutor, string TicketId)
+        public IActionResult GetIdResposta([FromHeader]string autorToken, string TicketId)
         {
-            var Core = new RespostaCore(_contexto).BuscarRespostas(TokenAutor, TicketId);
+            var Core = new RespostaCore(_contexto).BuscarRespostas(autorToken, TicketId);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         [HttpPut("{TicketId}")]
-        public IActionResult AtualizarTicketId(string TokenAutor, string TicketId, Resposta resposta)
+        public IActionResult AtualizarRespostaId([FromHeader]string autorToken, string TicketId, Resposta resposta)
         {
-            var Core = new RespostaCore(_contexto).EditarResposta(TokenAutor, TicketId, resposta);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new RespostaCore(_contexto).EditarResposta(autorToken, TicketId, resposta);
+            return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);
         }
 
         [HttpDelete("{TicketId}")]
-        public IActionResult DeletarTicketId([FromHeader]string TokenAutor, string TicketId)
+        public IActionResult DeletarRespostaId([FromHeader]string autorToken, string TicketId)
         {
-            var Core = new RespostaCore(_contexto).DeletarResposta(TokenAutor, TicketId);
+            var Core = new RespostaCore(_contexto).DeletarResposta(autorToken, TicketId);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
     }

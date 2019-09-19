@@ -15,6 +15,7 @@ namespace ApiForum.Controllers
         public UsuariosController(ServiceContext contexto) =>  _contexto = contexto;
 
         // Cadastrar um usuario
+        [HttpPost]
         public IActionResult Cadastro([FromBody] Usuario Usuario)
         {
             var Core = new UsuarioCore(Usuario, _contexto).CadastrarUsuario();
