@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿ using AutoMapper;
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
@@ -34,9 +34,9 @@ namespace ApiForum.Controllers
 
         //Chamando o metodo de listar todos da core 
         [HttpGet]
-        public IActionResult GetTodosTickets([FromHeader]string autorToken)
+        public IActionResult GetTodosTickets([FromHeader]string autorToken,[FromQuery] int numeroPagina,[FromQuery]int quantidadePagina)
         {
-            var Core = new TicketCore(_contexto).BuscarTodosTickets(autorToken);
+            var Core = new TicketCore(_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 

@@ -29,19 +29,16 @@ namespace ApiTicket
             {
                 s.SwaggerDoc("v1", new Info { Title = "Ticket Api", Version = "v1" });
             });
-
-          
-
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<Ticket, Ticket>()
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
                     .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
                     .ForMember(dest => dest.ClienteId, opt => opt.Ignore())
+                    .ForMember(dest => dest.AtendenteId, opt => opt.Ignore())
                     .ForMember(dest => dest.LstRespostas, opt => opt.Ignore())
                     .ForMember(dest => dest.Avaliacao, opt => opt.Condition(ori => ori.Avaliacao != null))
                     .ForMember(dest => dest.Status, opt => opt.Condition(ori => ori.Status != null))
-                    .ForMember(dest => dest.Tipo, opt => opt.Condition(ori => ori.Tipo != null))
                     .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null));
             });
             IMapper mapper = config.CreateMapper();

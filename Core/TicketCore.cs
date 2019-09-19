@@ -20,7 +20,7 @@ namespace Core
 
         #region Construtores
         public TicketCore(ServiceContext serviceContext) => _serviceContext = serviceContext;
-        public TicketCore(IMapper mapper, ServiceContext serviceContext )
+        public TicketCore(IMapper mapper, ServiceContext serviceContext)
         {
             _mapper = mapper;
             _serviceContext = serviceContext;
@@ -63,13 +63,13 @@ namespace Core
             if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
             if (cliente.Tipo != "CLIENTE") return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é do tipo cliente" } };
 
+
             _ticket.NumeroTicket = ConvertNumeroTickets();
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
             _serviceContext.SaveChanges();
 
-           return new Retorno { Status = true, Resultado = new List<string>{$"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!"} };
-
+            return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
         public Retorno AtualizarTicket(string Usertoken, string TicketID, Ticket ticketView)
         {
@@ -92,16 +92,15 @@ namespace Core
             _mapper.Map(ticketView, ticketSelecionado);
             _serviceContext.SaveChanges();
             return new Retorno { Status = true, Resultado = ticketSelecionado };
-
         }
         public Retorno DeletarTicket(string Usertoken, string TicketID)
         {
             //verifico login.
-           if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-               return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+            if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-           //verifico se o Ticket ID é valido.
-           if(!Autorizacao.GuidValidation(TicketID))
+            //verifico se o Ticket ID é valido.
+            if (!Autorizacao.GuidValidation(TicketID))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
@@ -133,44 +132,86 @@ namespace Core
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
             if (cliente.Id != TicketSolicitado.ClienteId) return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-           
-            return TicketSolicitado != null? new Retorno {Status = true , Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
-
+            return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
-
-        public Retorno BuscarTodosTickets(string Usertoken)
+        public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
         {
             //verifico login.
-            if (!Autorizacao.GuidValidation(Usertoken)) 
-            return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+            if (!Autorizacao.GuidValidation(Usertoken))
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-            var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
-            if (cliente == null) 
-             return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
+            //busco pelo usuario e vejo se ele existe.
+            var usuario = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
+            if (usuario == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
-            var todos = _serviceContext.Tickets.ToList();
+            // nova instancia da paganicação
+            var Paginacao = new Paginacao();
 
-            //se o cliente for atendente ele tem acesso total
-            if (cliente.Tipo.ToUpper() == "ATENDENTE") 
-                return todos.Any() ? 
-                    new Retorno { Status = true, Resultado = todos } 
-                    : new Retorno { Status = false, Resultado = new List<string> {"Não existe nenhum ticket na base de dados."} };
-           
-            //se for um cliente ele só pode ver os tickets dele.
-            return todos.Where(t => t.ClienteId == cliente.Id).ToList().Count() > 0 ?
-                new Retorno { Status = true, Resultado = todos.Where(t => t.ClienteId == cliente.Id).ToList() } 
-                : new Retorno { Status = false, Resultado = new List<string> { $"{cliente.Nome} você não fez nenhum ticket." } };
+            //Confiro o tipo do usuario e exibo os resultados paginados de acordo com o tipo do usuario
+            if (usuario.Tipo.ToUpper() == "ATENDENTE")
+            {
+                // busco pelos tickets daquele especifico usuario 
+                var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+
+                // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
+                if (NumeroPagina > 0 && QuantidadeRegistro > 0)
+                {
+                    Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsAtendente.Count());
+                    return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente.OrderBy(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
+                }
+
+                Paginacao.Paginar(1, 10, ticketsAtendente.Count());
+
+                return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente.Take(10) };
+            }
+            // busco pelos tickets daquele especifico usuario 
+            var ticketsCliente = _serviceContext.Tickets.Where(c => c.ClienteId == Guid.Parse(Usertoken) && c.Status == Enum.Parse<Status>("ABERTO")).ToList();
+
+            // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
+            if (NumeroPagina > 0 && QuantidadeRegistro > 0)
+            {
+                Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsCliente.Count());
+                return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsCliente.OrderBy(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
+            }
+            Paginacao.Paginar(1, 10, ticketsCliente.Count());
+
+            return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsCliente.Take(10) };
         }
-         public string ConvertNumeroTickets()
+
+        // Método para buscar os tickets disponiveis para o atendente
+        public Retorno BuscarTicketSemAtendente(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
         {
-            var random = new Random();
+              //verifico login.
+            if (!Autorizacao.GuidValidation(Usertoken))
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+
+            var todosTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null);
+
+            // nova instancia da paganicação
+            var Paginacao = new Paginacao();
+
+            // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
+            if (NumeroPagina > 0 && QuantidadeRegistro > 0)
+            {
+                Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, todosTickets.Count());
+                return new Retorno { Status = true, Paginacao = Paginacao, Resultado = todosTickets.OrderBy(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
+            }
+
+            Paginacao.Paginar(1, 10, todosTickets.Count());
+
+            return new Retorno { Status = true, Paginacao = Paginacao, Resultado = todosTickets.Take(10) };
+        }
+
+        //metodo para fazer uma identificação unica de cada usuário.
+        public string ConvertNumeroTickets()
+        {
             var dataString = DateTime.Now.ToString("MMyyyy", CultureInfo.CreateSpecificCulture("pt-BR")); ;
-            var number = 7 * random.Next(1000, 9999) / 100;
 
-            if (number == 0)
-                number = 6 * random.Next(1000, 9999) / 100;
-
-
+            //aqui eu faço um calculo com números aleatórios. 
+            var number = 7 * new Random().Next(1000000, 9999999) / 100;
+    
+            //aqui retornamos o dia e o ano junto com o resultado dos calculos.
             return dataString + number.ToString("D");
         }
     }

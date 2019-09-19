@@ -18,6 +18,7 @@ namespace Model
                 {
                     Tipo.Entity.Nome = Tipo.Entity.Nome.ToUpper();
                     Tipo.Entity.Tipo = Tipo.Entity.Tipo.ToUpper();
+                    Tipo.Entity.Email = Tipo.Entity.Email.ToUpper();
                 }
             }
             return base.SaveChanges();
