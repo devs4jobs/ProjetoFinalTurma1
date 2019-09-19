@@ -19,14 +19,14 @@ namespace ApiForum.Controllers
         public IActionResult Cadastro([FromBody] Usuario Usuario)
         {
             var Core = new UsuarioCore(Usuario, _contexto).CadastrarUsuario();
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Created("https://localhost:44362//api/Usuarios/Autenticar", Core) : (IActionResult)Ok(Core);
         }
         //Chamando o metodo de logar usurario da core 
         [HttpPost("Autenticar")]
         public IActionResult Logar([FromBody] Usuario usuario)
         {
             var Core = new UsuarioCore(usuario, _contexto).LogarUsuario();
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ApiForum.Controllers
         public IActionResult CadastrarTicket([FromBody] Ticket ticket, [FromHeader] string Usertoken)
         {
             var Core = new TicketCore(ticket, _contexto).CadastrarTicket(Usertoken);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Created("https://localhost:44362//api/Tickets/", Core) : (IActionResult)Ok(Core);
         }
 
         [HttpGet("{TicketID}")]
@@ -29,7 +29,7 @@ namespace ApiForum.Controllers
         public IActionResult GetIdTicket([FromHeader]string Usertoken, string TicketID)
         {
             var Core = new TicketCore(_contexto).BuscarTicketporID(Usertoken, TicketID);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         //Chamando o metodo de listar todos da core 
@@ -37,21 +37,21 @@ namespace ApiForum.Controllers
         public IActionResult GetTodosTickets([FromHeader]string Usertoken)
         {
             var Core = new TicketCore(_contexto).BuscarTodosTickets(Usertoken);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         [HttpPut("{TicketID}")]
         public IActionResult AtualizarTicketId([FromHeader]string Usertoken, string TicketID,[FromBody] Ticket ticket)
         {
             var Core = new TicketCore(_Mapper,_contexto).AtualizarTicket(Usertoken, TicketID, ticket);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         [HttpDelete("{TicketID}")]
         public IActionResult DeletarTicketId([FromHeader]string Usertoken, string TicketID)
         {
             var Core = new TicketCore(_contexto).DeletarTicket(Usertoken, TicketID);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
     }
 }
