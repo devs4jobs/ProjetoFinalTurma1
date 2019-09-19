@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using AutoMapper;
+using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
 
@@ -10,6 +11,7 @@ namespace ApiForum.Controllers
     {
         //Construtor contendo o contexto.
         private ServiceContext _contexto { get; set; }
+        private IMapper _Mapper { get; set; }
 
         // construtor para a utilização do automapper por meio de injeçao de dependecia
         public TicketsController(ServiceContext contexto) => _contexto = contexto;
@@ -22,7 +24,7 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{TicketID}")]
       
         public IActionResult GetIdTicket([FromHeader]string Usertoken, string TicketID)
         {
@@ -41,7 +43,7 @@ namespace ApiForum.Controllers
         [HttpPut("{TicketID}")]
         public IActionResult AtualizarTicketId([FromHeader]string Usertoken, string TicketID,[FromBody] Ticket ticket)
         {
-            var Core = new TicketCore(_contexto).AtualizarTicket(Usertoken, TicketID, ticket);
+            var Core = new TicketCore(_Mapper,_contexto).AtualizarTicket(Usertoken, TicketID, ticket);
             return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
         }
 

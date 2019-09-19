@@ -30,6 +30,8 @@ namespace ApiTicket
                 s.SwaggerDoc("v1", new Info { Title = "Ticket Api", Version = "v1" });
             });
 
+          
+
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<Ticket, Ticket>()
@@ -42,6 +44,8 @@ namespace ApiTicket
                     .ForMember(dest => dest.Tipo, opt => opt.Condition(ori => ori.Titulo != null))
                     .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null));
             });
+            IMapper mapper = config.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

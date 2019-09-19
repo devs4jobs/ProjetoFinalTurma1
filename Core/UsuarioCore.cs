@@ -30,10 +30,9 @@ namespace Core
         //Método para cadastro de usuario
         public Retorno CadastrarUsuario()
         {
-            var valida = Validate(_usuario);
-
-            if (!valida.IsValid)
-                return new Retorno { Status = false, Resultado = valida.Errors.Select(a => a.ErrorMessage).ToList() };
+            var validar = Validate(_usuario);
+            if (!validar.IsValid)
+                return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
 
             if (_dbcontext.Usuarios.Any(e => e.Email == _usuario.Email))
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
