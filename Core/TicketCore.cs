@@ -178,6 +178,32 @@ namespace Core
 
             return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsCliente.Take(10) };
         }
+        public Retorno TomarPosseTicket(string Usertoken, string TicketID)
+        {
+            //verifico login.
+            if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+
+            //verifico se o Ticket ID é valido.
+            if (!Autorizacao.GuidValidation(TicketID))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
+
+            //verifico se tem um usuário na base com ID informado e o tipo dele é atendente.
+            var atendente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken) && u.Tipo == "ATENDENTE");
+            if (atendente == null) return new Retorno { Status = false, Resultado = new List<string> { "Atendente não identificado!" } };
+
+            //verifico se o ticket solicitado existe na base de dados.
+            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID));
+            if (TicketSolicitado.Atendente == null && TicketSolicitado.AtendenteId == null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
+
+            //passo os valores para o ticket
+            TicketSolicitado.Atendente = atendente;
+            TicketSolicitado.AtendenteId = atendente.Id;
+
+            _serviceContext.SaveChanges();
+            return new Retorno { Status = true, Resultado = new List<string> { $"{atendente.Nome} você atribuiu esse Ticket a sua base." } };
+
+        }
 
         // Método para buscar os tickets disponiveis para o atendente
         public Retorno BuscarTicketSemAtendente(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
