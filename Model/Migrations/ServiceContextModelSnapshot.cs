@@ -46,11 +46,15 @@ namespace Model.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<Guid?>("AtendenteId");
+
                     b.Property<int?>("Avaliacao");
 
                     b.Property<Guid?>("ClienteId");
 
                     b.Property<DateTime>("DataCadastro");
+
+                    b.Property<string>("Mensagem");
 
                     b.Property<string>("NumeroTicket");
 
@@ -61,6 +65,8 @@ namespace Model.Migrations
                     b.Property<string>("Titulo");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AtendenteId");
 
                     b.HasIndex("ClienteId");
 
@@ -102,6 +108,10 @@ namespace Model.Migrations
 
             modelBuilder.Entity("Model.Ticket", b =>
                 {
+                    b.HasOne("Model.Usuario", "Atendente")
+                        .WithMany()
+                        .HasForeignKey("AtendenteId");
+
                     b.HasOne("Model.Usuario", "Cliente")
                         .WithMany()
                         .HasForeignKey("ClienteId");

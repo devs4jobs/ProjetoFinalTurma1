@@ -31,14 +31,22 @@ namespace Model.Migrations
                     DataCadastro = table.Column<DateTime>(nullable: false),
                     NumeroTicket = table.Column<string>(nullable: true),
                     ClienteId = table.Column<Guid>(nullable: true),
+                    AtendenteId = table.Column<Guid>(nullable: true),
                     Status = table.Column<int>(nullable: true),
                     Titulo = table.Column<string>(nullable: true),
                     Tipo = table.Column<string>(nullable: true),
+                    Mensagem = table.Column<string>(nullable: true),
                     Avaliacao = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tickets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tickets_Usuarios_AtendenteId",
+                        column: x => x.AtendenteId,
+                        principalTable: "Usuarios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Tickets_Usuarios_ClienteId",
                         column: x => x.ClienteId,
@@ -83,6 +91,11 @@ namespace Model.Migrations
                 name: "IX_Respostas_UsuarioId",
                 table: "Respostas",
                 column: "UsuarioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_AtendenteId",
+                table: "Tickets",
+                column: "AtendenteId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tickets_ClienteId",

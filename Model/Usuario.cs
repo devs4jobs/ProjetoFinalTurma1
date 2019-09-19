@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model
 {
@@ -10,5 +11,7 @@ namespace Model
         [NotMapped]
         public string ConfirmaSenha { get; set; }
         public string Tipo { get; set; } //cliente ou atendente. not null.
+        [NotMapped]
+        public List<Ticket> AtendenteTickets { get; set; }
     }
 }

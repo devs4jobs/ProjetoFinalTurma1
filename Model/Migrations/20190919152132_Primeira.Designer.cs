@@ -10,7 +10,7 @@ using Model;
 namespace Model.Migrations
 {
     [DbContext(typeof(ServiceContext))]
-    [Migration("20190919140211_Primeira")]
+    [Migration("20190919152132_Primeira")]
     partial class Primeira
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,11 +48,15 @@ namespace Model.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<Guid?>("AtendenteId");
+
                     b.Property<int?>("Avaliacao");
 
                     b.Property<Guid?>("ClienteId");
 
                     b.Property<DateTime>("DataCadastro");
+
+                    b.Property<string>("Mensagem");
 
                     b.Property<string>("NumeroTicket");
 
@@ -63,6 +67,8 @@ namespace Model.Migrations
                     b.Property<string>("Titulo");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AtendenteId");
 
                     b.HasIndex("ClienteId");
 
@@ -104,6 +110,10 @@ namespace Model.Migrations
 
             modelBuilder.Entity("Model.Ticket", b =>
                 {
+                    b.HasOne("Model.Usuario", "Atendente")
+                        .WithMany()
+                        .HasForeignKey("AtendenteId");
+
                     b.HasOne("Model.Usuario", "Cliente")
                         .WithMany()
                         .HasForeignKey("ClienteId");
