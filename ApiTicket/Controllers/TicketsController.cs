@@ -21,7 +21,7 @@ namespace ApiForum.Controllers
         public IActionResult CadastrarTicket([FromBody] Ticket ticket, [FromHeader] string Usertoken)
         {
             var Core = new TicketCore(ticket, _contexto).CadastrarTicket(Usertoken);
-            return Core.Status ? Created("https://localhost:44362//api/Tickets/", Core) : (IActionResult)Ok(Core);
+            return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
         }
 
         [HttpGet("{TicketID}")]
