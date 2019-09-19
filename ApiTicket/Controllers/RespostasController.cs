@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Model;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace ApiForum.Controllers
 {
     [Route("api/[controller]")]
@@ -20,28 +21,28 @@ namespace ApiForum.Controllers
         public IActionResult CadastrarTicket([FromBody] Resposta resposta, [FromHeader] string autorToken)
         {
             var Core = new RespostaCore(resposta, _contexto).CadastrarResposta(autorToken);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Created("https://localhost:44362//api/Respostas/", Core) : (IActionResult)Ok(Core);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{TicketId}")]
         public IActionResult GetIdTicket(string TokenAutor, string TicketId)
         {
             var Core = new RespostaCore(_contexto).BuscarRespostas(TokenAutor, TicketId);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{TicketId}")]
         public IActionResult AtualizarTicketId(string TokenAutor, string TicketId, Resposta resposta)
         {
             var Core = new RespostaCore(_contexto).EditarResposta(TokenAutor, TicketId, resposta);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{TicketId}")]
         public IActionResult DeletarTicketId([FromHeader]string TokenAutor, string TicketId)
         {
             var Core = new RespostaCore(_contexto).DeletarResposta(TokenAutor, TicketId);
-            return Core.Status ? Ok(Core) : (IActionResult)BadRequest(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
     }
 }
