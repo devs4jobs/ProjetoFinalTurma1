@@ -40,6 +40,14 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
+        //Chamando o metodo de listar todos da core 
+        [HttpGet("Tickets")]
+        public IActionResult GetTicketsDisponiveis([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina)
+        {
+            var Core = new TicketCore(_contexto).BuscarTicketSemAtendente(autorToken, numeroPagina, quantidadePagina);
+            return Core.Status ? Ok(Core) : Ok(Core);
+        }
+
         [HttpPut("{TicketID}")]
         public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID,[FromBody] Ticket ticket)
         {
