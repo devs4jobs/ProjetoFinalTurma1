@@ -2,7 +2,7 @@
 {
     public enum Avaliacao : int
     {
-        NÂO_AVALIADO=0,
+        NÂOAVALIADO=0,
         RUIM = 1,
         RAZOAVEL = 2,
         BOM = 3,
