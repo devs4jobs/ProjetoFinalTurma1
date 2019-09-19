@@ -151,6 +151,5 @@ namespace Core
                 new Retorno { Status = true, Resultado = todos.Where(t => t.ClienteId == cliente.Id).ToList() } 
                 : new Retorno { Status = false, Resultado = new List<string> { $"{cliente.Nome} você não fez nenhum ticket." } };
         }
-
     }
 }
