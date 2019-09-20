@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model
 {
+    /// <summary>
+    /// Minha Model Ticket tem todos os atributos necessarios para controle e relacionamento.
+    /// </summary>
     public class Ticket : Base
     {
         public string NumeroTicket { get; set; }
