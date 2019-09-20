@@ -148,7 +148,8 @@ namespace Core
             {
                 // busco pelos tickets daquele especifico usuario 
 
-                var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status != Enum.Parse<Status>("FECHADO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+                var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
+                && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
 
                 ticketsAtendente.ForEach(t => VerificaData(t));
                 _serviceContext.SaveChanges();
@@ -168,7 +169,7 @@ namespace Core
             }
             // busco pelos tickets daquele especifico usuario 
 
-            var ticketsCliente = _serviceContext.Tickets.Where(c => c.ClienteId == Guid.Parse(Usertoken) && c.Status == Enum.Parse<Status>("ABERTO")).ToList();
+            var ticketsCliente = _serviceContext.Tickets.Where(c =>  c.Status == Enum.Parse<Status>("ABERTO") ||  c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE") && c.ClienteId == Guid.Parse(Usertoken) ).ToList();
             ticketsCliente.ForEach(r => VerificaData(r));
             _serviceContext.SaveChanges();
 
