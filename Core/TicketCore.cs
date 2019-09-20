@@ -65,10 +65,10 @@ namespace Core
             if (cliente.Tipo != "CLIENTE") return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é do tipo cliente" } };
 
             _ticket.NumeroTicket = ConvertNumeroTickets();
-            
+
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
-            await  _serviceContext.SaveChangesAsync();
+            await _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
@@ -130,8 +130,8 @@ namespace Core
             if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
-            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID) && t.ClienteId == cliente.Id );
-            
+            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID) && t.ClienteId == cliente.Id);
+
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
         public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
@@ -144,10 +144,10 @@ namespace Core
             var usuario = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
             if (usuario == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
-          
+
             // nova instancia da paganicação
             var Paginacao = new Paginacao();
-      
+
             //Confiro o tipo do usuario e exibo os resultados paginados de acordo com o tipo do usuario
             if (usuario.Tipo.ToUpper() == "ATENDENTE")
             {
@@ -260,18 +260,18 @@ namespace Core
 
         // metódo para realizar o fechamento do ticket
         public Retorno FecharTicket(string tokenAutor, string ticketId)
-        {  
+        {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
             // verifico se o guid o ticket é valido
-            if(!Guid.TryParse(ticketId, out Guid result))
+            if (!Guid.TryParse(ticketId, out Guid result))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
             // busco e valido se este ticket em especifico é valido.
             var oTicket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == Guid.Parse(ticketId) && c.AtendenteId == Guid.Parse(tokenAutor));
 
-            if(oTicket == null)
+            if (oTicket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
             // atribuo e fecho o ticket
@@ -294,9 +294,9 @@ namespace Core
 
         public static void VerificaData(Ticket ticket)
         {
-            var ultimaResposta = ticket.LstRespostas.FindLast(c =>ticket.AtendenteId != null);
-            if(ultimaResposta.DataCadastro.AddDays(14) < DateTime.Now)
-                    ticket.Status = Enum.Parse<Status>("FECHADO");
+            var ultimaResposta = ticket.LstRespostas.FindLast(c => ticket.AtendenteId != null);
+            if (ultimaResposta.DataCadastro.AddDays(14) < DateTime.Now)
+                ticket.Status = Enum.Parse<Status>("FECHADO");
 
             if (ticket.DataCadastro.AddMonths(1) < DateTime.Now && ticket.AtendenteId != null)
                 ticket.Status = Enum.Parse<Status>("FECHADO");
