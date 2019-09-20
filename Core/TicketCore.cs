@@ -144,10 +144,7 @@ namespace Core
             var usuario = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
             if (usuario == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
-
-            foreach(var ticket in _serviceContext.Tickets)
-            VerificaData(ticket);
-           
+          
             // nova instancia da paganicação
             var Paginacao = new Paginacao();
       
@@ -156,6 +153,7 @@ namespace Core
             {
                 // busco pelos tickets daquele especifico usuario 
                 var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+                ticketsAtendente.ForEach(t => VerificaData(t));
 
                 // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
                 if (NumeroPagina > 0 && QuantidadeRegistro > 0)
@@ -169,7 +167,8 @@ namespace Core
                 return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente.Take(10) };
             }
             // busco pelos tickets daquele especifico usuario 
-            var ticketsCliente = _serviceContext.Tickets.Where(c => c.ClienteId == Guid.Parse(Usertoken) && c.Status == Enum.Parse<Status>("ABERTO")).ToList();
+
+            var ticketsCliente = _serviceContext.Tickets.Where(c => c.ClienteId == Guid.Parse(Usertoken) && c.Status == Enum.Parse<Status>("ABERTO")).ToList();         
 
             // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
             if (NumeroPagina > 0 && QuantidadeRegistro > 0)
