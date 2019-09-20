@@ -54,17 +54,18 @@ namespace Core
         }
 
         //Método para buscar todas as respostas daquele ticket em especificio 
-        public Retorno BuscarRespostas(string tokenAutor, string id )
+        public Retorno BuscarRespostas(string tokenAutor, string ticketId )
         {
             // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            if (!Autorizacao.GuidValidation(id))
-                return new Retorno { Status = false, Resultado = new List<string> { "Id do ticket inválido" } };
+            // verifico se o guid o ticket é valido
+            if (!Guid.TryParse(ticketId, out Guid result))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
             // busco por todas as respotas e faço o teste se esse ticket tem respostas
-            var todasRespostas = _serviceContext.Respostas.Where(r => r.Id == Guid.Parse(id)).ToList();
+            var todasRespostas = _serviceContext.Respostas.Where(r => r.Id == result).ToList();
 
             return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = todasRespostas.OrderByDescending(c => c.DataCadastro) };
         }
@@ -75,7 +76,11 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == Guid.Parse(ticketId));
+            // verifico se o guid o ticket é valido
+            if (!Guid.TryParse(ticketId, out Guid result))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
+
+            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == result);
 
             if (umaResposta == null )
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
@@ -104,7 +109,11 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == Guid.Parse(ticketId));
+            // verifico se o guid o ticket é valido
+            if (!Guid.TryParse(ticketId, out Guid result))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
+
+            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == result);
             if (umaResposta == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
