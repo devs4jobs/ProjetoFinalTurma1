@@ -20,15 +20,15 @@ namespace ApiForum.Controllers
         [HttpPost]
         public IActionResult CadastrarTicket([FromBody] Ticket ticket, [FromHeader] string autorToken)
         {
-            var Core = new TicketCore(ticket, _contexto).CadastrarTicket(autorToken);
+            var Core = new TicketCore(ticket, _contexto).CadastrarTicket(autorToken).Result;
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
         }
 
-        [HttpPost]
+        [HttpPost("PegarTicket")]
         public IActionResult TomarPosseDoTicket([FromBody]string TicketID, [FromHeader] string autorToken)
         {
             var Core = new TicketCore(_contexto).TomarPosseTicket(autorToken, TicketID);
-            return Core.Status ? Ok(Core) : (IActionResult)Ok(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         [HttpGet("{TicketID}")]
@@ -66,6 +66,19 @@ namespace ApiForum.Controllers
         public IActionResult DeletarTicketId([FromHeader]string autorToken, string TicketID)
         {
             var Core = new TicketCore(_contexto).DeletarTicket(autorToken, TicketID);
+            return Core.Status ? Ok(Core) : Ok(Core);
+        }
+
+        [HttpPost("Avaliar")]
+        public IActionResult AvaliarTicket([FromHeader]string autorToken, string TicketID, string avaliacao)
+        {
+            var Core = new TicketCore(_contexto).AvaliarTicket(autorToken, TicketID, avaliacao);
+            return Core.Status ? Ok(Core) : Ok(Core);
+        }
+        [HttpPost("Fechar")]
+        public IActionResult FecharTicket([FromHeader]string autorToken, string TicketID)
+        {
+            var Core = new TicketCore(_contexto).FecharTicket(autorToken, TicketID);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
     }

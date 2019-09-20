@@ -8,7 +8,7 @@ namespace Core
 {
     public class UsuarioCore : AbstractValidator<Usuario>
     {
-        private Usuario _usuario;
+        private Usuario _usuario { get; set; }
         public ServiceContext _dbcontext { get; set; }
 
         public UsuarioCore(ServiceContext Context) => _dbcontext = Context;
@@ -34,6 +34,7 @@ namespace Core
             if (!validar.IsValid)
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
 
+            //Validacao pelo email e  a adição no db
             if (_dbcontext.Usuarios.Any(e => e.Email == _usuario.Email))
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
 

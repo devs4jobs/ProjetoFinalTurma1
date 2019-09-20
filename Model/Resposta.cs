@@ -7,9 +7,9 @@ namespace Model
     {
         public string Mensagem { get; set; }
         [ForeignKey("Tickets")]
-        public Guid TicketId { get; set; }
+        public Guid? TicketId { get; set; }
         public Usuario Usuario { get; set; }
         [ForeignKey("Usuarios")]
-        public Guid UsuarioId { get; set; }
+        public Guid? UsuarioId { get; set; }
     }
 }
