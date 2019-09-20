@@ -156,11 +156,11 @@ namespace Core
                 // busco pelos tickets daquele especifico usuario 
                 var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
 
-                // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
+                // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
                 if (NumeroPagina > 0 && QuantidadeRegistro > 0)
                 {
                     Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsAtendente.Count());
-                    return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente.OrderBy(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
+                    return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
                 }
 
                 Paginacao.Paginar(1, 10, ticketsAtendente.Count());
