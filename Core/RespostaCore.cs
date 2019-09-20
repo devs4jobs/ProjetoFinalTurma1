@@ -41,7 +41,6 @@ namespace Core
 
             var Usuario = _serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId);
 
-
             if (Usuario.Tipo == "CLIENTE") Ticket.Status=Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
             else Ticket.Status= Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
 
