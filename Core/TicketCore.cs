@@ -132,8 +132,6 @@ namespace Core
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID) && t.ClienteId == cliente.Id );
             
-            
-
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
         public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
@@ -154,7 +152,7 @@ namespace Core
             if (usuario.Tipo.ToUpper() == "ATENDENTE")
             {
                 // busco pelos tickets daquele especifico usuario 
-                var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+                var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status != Enum.Parse<Status>("FECHADO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
 
                 // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
                 if (NumeroPagina > 0 && QuantidadeRegistro > 0)
@@ -203,7 +201,6 @@ namespace Core
 
             _serviceContext.SaveChanges();
             return new Retorno { Status = true, Resultado = new List<string> { $"{atendente.Nome} você atribuiu esse Ticket a sua base." } };
-
         }
 
         // Método para buscar os tickets disponiveis para o atendente
@@ -213,7 +210,7 @@ namespace Core
             if (!Autorizacao.GuidValidation(Usertoken))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-            var todosTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null);
+            var todosTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status  != Enum.Parse<Status>("FECHADO"));
 
             // nova instancia da paganicação
             var Paginacao = new Paginacao();
