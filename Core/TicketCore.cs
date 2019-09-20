@@ -145,13 +145,12 @@ namespace Core
             if (usuario == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
-            VerificaData(_ticket);
-
+            foreach(var ticket in _serviceContext.Tickets)
+            VerificaData(ticket);
+           
             // nova instancia da paganicação
             var Paginacao = new Paginacao();
-
-            
-
+      
             //Confiro o tipo do usuario e exibo os resultados paginados de acordo com o tipo do usuario
             if (usuario.Tipo.ToUpper() == "ATENDENTE")
             {
