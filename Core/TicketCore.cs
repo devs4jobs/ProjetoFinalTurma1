@@ -289,14 +289,20 @@ namespace Core
             return dataString + number.ToString("D");
         }
 
-        public static void VerificaData(Ticket ticket)
+        public void VerificaData(Ticket ticket)
         {
-            var ultimaResposta = ticket.LstRespostas.FindLast(c => ticket.AtendenteId != null);
-            if (ultimaResposta.DataCadastro.AddDays(14) < DateTime.Now)
-                ticket.Status = Enum.Parse<Status>("FECHADO");
+            if (ticket.LstRespostas == null)
+                ticket.LstRespostas = new List<Resposta>();
 
-            if (ticket.DataCadastro.AddMonths(1) < DateTime.Now && ticket.AtendenteId != null)
-                ticket.Status = Enum.Parse<Status>("FECHADO");
+                if (ticket.LstRespostas.Any())
+                {
+                    var ultimaResposta = ticket.LstRespostas.FindLast(c => ticket.AtendenteId != null || ticket.ClienteId != null);
+                    if (ultimaResposta.DataCadastro.AddDays(14) < DateTime.Now)
+                        ticket.Status = Enum.Parse<Status>("FECHADO");
+                }
+                
+                if (ticket.DataCadastro.AddMonths(1) < DateTime.Now && ticket.AtendenteId != null )
+                    ticket.Status = Enum.Parse<Status>("FECHADO");
         }
     }
 }
