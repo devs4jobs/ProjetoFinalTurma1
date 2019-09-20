@@ -39,6 +39,9 @@ namespace Core
             if (Ticket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
 
+            if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
+                return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
+
             var Usuario = _serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId);
 
             if (Usuario.Tipo == "CLIENTE") Ticket.Status=Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
