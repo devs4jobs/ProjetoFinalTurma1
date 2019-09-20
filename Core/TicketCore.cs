@@ -159,7 +159,7 @@ namespace Core
                 {
                     Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsAtendente.Count());
                     var listaPaginada = ticketsAtendente.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
-                    return listaPaginada.Count() == 0 ? new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente.Take(10) } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente };
+                    return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente };
                 }
 
                 Paginacao.Paginar(1, 10, ticketsAtendente.Count());
@@ -177,7 +177,7 @@ namespace Core
             {
                 Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsCliente.Count());
                 var listaPaginada = ticketsCliente.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
-                return listaPaginada.Count() == 0 ? new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsCliente.Take(10) } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsCliente };
+                return listaPaginada.Count() == 0 ? new Retorno { Status = false,  Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsCliente };
             }
             Paginacao.Paginar(1, 10, ticketsCliente.Count());
 
