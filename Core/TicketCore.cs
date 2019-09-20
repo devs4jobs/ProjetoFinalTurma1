@@ -45,7 +45,7 @@ namespace Core
         }
         #endregion
 
-        public async Task <Retorno> CadastrarTicket(string Usertoken)
+        public async Task<Retorno> CadastrarTicket(string Usertoken)
         {
             //verifico login.
             if (!Autorizacao.GuidValidation(Usertoken))
@@ -64,8 +64,8 @@ namespace Core
             if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
             if (cliente.Tipo != "CLIENTE") return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é do tipo cliente" } };
 
-
             _ticket.NumeroTicket = ConvertNumeroTickets();
+            
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
             await  _serviceContext.SaveChangesAsync();

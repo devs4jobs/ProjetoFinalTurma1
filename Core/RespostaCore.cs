@@ -9,8 +9,8 @@ namespace Core
 {
     public class RespostaCore : AbstractValidator<Resposta>
     {
-        private Resposta _resposta;
-        public ServiceContext _serviceContext { get; set; }
+        private Resposta _resposta { get; set; }
+        private ServiceContext _serviceContext { get; set; }
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
@@ -39,10 +39,13 @@ namespace Core
             if (Ticket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
 
+            if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
+                return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
+
             var Usuario = _serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId);
 
-            if (Usuario.Tipo == "CLIENTE") Ticket.Status=Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
-            else Ticket.Status= Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
+            if (Usuario.Tipo == "CLIENTE") Ticket.Status=Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
+            else Ticket.Status= Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
 
 
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta enviada!" } };

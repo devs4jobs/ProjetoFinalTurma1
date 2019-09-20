@@ -8,7 +8,7 @@ namespace Core
 {
     public class UsuarioCore : AbstractValidator<Usuario>
     {
-        private Usuario _usuario;
+        private Usuario _usuario { get; set; }
         public ServiceContext _dbcontext { get; set; }
 
         public UsuarioCore(ServiceContext Context) => _dbcontext = Context;
