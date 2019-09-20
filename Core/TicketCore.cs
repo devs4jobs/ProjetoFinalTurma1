@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using AutoMapper;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Core
 {
@@ -44,7 +45,7 @@ namespace Core
         }
         #endregion
 
-        public Retorno CadastrarTicket(string Usertoken)
+        public async Task <Retorno> CadastrarTicket(string Usertoken)
         {
             //verifico login.
             if (!Autorizacao.GuidValidation(Usertoken))
@@ -67,7 +68,7 @@ namespace Core
             _ticket.NumeroTicket = ConvertNumeroTickets();
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
-            _serviceContext.SaveChanges();
+            await  _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
@@ -128,9 +129,10 @@ namespace Core
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
             if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
-            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID));
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
-            if (cliente.Id != TicketSolicitado.ClienteId) return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID) && t.ClienteId == cliente.Id );
+            
+            
 
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
@@ -194,10 +196,9 @@ namespace Core
 
             //verifico se o ticket solicitado existe na base de dados.
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID));
-            if (TicketSolicitado.Atendente == null && TicketSolicitado.AtendenteId == null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
+            if (TicketSolicitado.AtendenteId == null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
 
-            //passo os valores para o ticket
-            TicketSolicitado.Atendente = atendente;
+            //passo o valor para o ticket
             TicketSolicitado.AtendenteId = atendente.Id;
 
             _serviceContext.SaveChanges();
