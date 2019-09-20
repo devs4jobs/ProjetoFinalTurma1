@@ -28,7 +28,7 @@ namespace ApiForum.Controllers
         public IActionResult TomarPosseDoTicket([FromBody]string TicketID, [FromHeader] string autorToken)
         {
             var Core = new TicketCore(_contexto).TomarPosseTicket(autorToken, TicketID);
-            return Core.Status ? Ok(Core) : (IActionResult)Ok(Core);
+            return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         [HttpGet("{TicketID}")]
