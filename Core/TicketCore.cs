@@ -67,7 +67,7 @@ namespace Core
             
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
-            await  _serviceContext.SaveChangesAsync();
+            await _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
@@ -149,6 +149,8 @@ namespace Core
             {
                 // busco pelos tickets daquele especifico usuario 
                 var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+                ticketsAtendente.ForEach(t => VerificaData(t));
+                _serviceContext.SaveChanges();
 
                 // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
                 if (NumeroPagina > 0 && QuantidadeRegistro > 0)
@@ -162,7 +164,10 @@ namespace Core
                 return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente.Take(10) };
             }
             // busco pelos tickets daquele especifico usuario 
+
             var ticketsCliente = _serviceContext.Tickets.Where(c => c.ClienteId == Guid.Parse(Usertoken) && c.Status == Enum.Parse<Status>("ABERTO")).ToList();
+            ticketsCliente.ForEach(r => VerificaData(r));
+            _serviceContext.SaveChanges();
 
             // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
             if (NumeroPagina > 0 && QuantidadeRegistro > 0)
@@ -251,18 +256,18 @@ namespace Core
 
         // metódo para realizar o fechamento do ticket
         public Retorno FecharTicket(string tokenAutor, string ticketId)
-        {  
+        {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
             // verifico se o guid o ticket é valido
-            if(!Guid.TryParse(ticketId, out Guid result))
+            if (!Guid.TryParse(ticketId, out Guid result))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
             // busco e valido se este ticket em especifico é valido.
             var oTicket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == Guid.Parse(ticketId) && c.AtendenteId == Guid.Parse(tokenAutor));
 
-            if(oTicket == null)
+            if (oTicket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
             // atribuo e fecho o ticket
@@ -281,6 +286,16 @@ namespace Core
 
             //aqui retornamos o dia e o ano junto com o resultado dos calculos.
             return dataString + number.ToString("D");
+        }
+
+        public static void VerificaData(Ticket ticket)
+        {
+            var ultimaResposta = ticket.LstRespostas.FindLast(c => ticket.AtendenteId != null);
+            if (ultimaResposta.DataCadastro.AddDays(14) < DateTime.Now)
+                ticket.Status = Enum.Parse<Status>("FECHADO");
+
+            if (ticket.DataCadastro.AddMonths(1) < DateTime.Now && ticket.AtendenteId != null)
+                ticket.Status = Enum.Parse<Status>("FECHADO");
         }
     }
 }
