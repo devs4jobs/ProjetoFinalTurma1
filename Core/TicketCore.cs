@@ -145,8 +145,12 @@ namespace Core
             if (usuario == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
+            VerificaData(_ticket);
+
             // nova instancia da paganicação
             var Paginacao = new Paginacao();
+
+            
 
             //Confiro o tipo do usuario e exibo os resultados paginados de acordo com o tipo do usuario
             if (usuario.Tipo.ToUpper() == "ATENDENTE")
@@ -239,6 +243,16 @@ namespace Core
     
             //aqui retornamos o dia e o ano junto com o resultado dos calculos.
             return dataString + number.ToString("D");
+        }
+
+        public static void VerificaData(Ticket ticket)
+        {
+            var ultimaResposta = ticket.LstRespostas.FindLast(c =>ticket.AtendenteId != null);
+            if(ultimaResposta.DataCadastro.AddDays(14) < DateTime.Now)
+                    ticket.Status = Enum.Parse<Status>("FECHADO");
+
+            if (ticket.DataCadastro.AddMonths(1) < DateTime.Now && ticket.AtendenteId != null)
+                ticket.Status = Enum.Parse<Status>("FECHADO");
         }
     }
 }
