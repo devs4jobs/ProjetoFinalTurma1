@@ -14,7 +14,7 @@ namespace Model
         [ForeignKey("Usuarios")]
         public Guid? AtendenteId { get; set; }
         public List<Resposta> LstRespostas { get; set; }
-        public Status? Status { get; set; } 
+        public Status? Status { get; set; } = Model.Status.ABERTO;
         public string Titulo { get; set; } 
         public string Mensagem { get; set; }
         public Avaliacao? Avaliacao { get; set; } 

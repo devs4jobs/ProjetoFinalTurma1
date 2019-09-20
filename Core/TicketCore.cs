@@ -222,7 +222,7 @@ namespace Core
             if (NumeroPagina > 0 && QuantidadeRegistro > 0)
             {
                 Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, todosTickets.Count());
-                return new Retorno { Status = true, Paginacao = Paginacao, Resultado = todosTickets.OrderBy(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
+                return new Retorno { Status = true, Paginacao = Paginacao, Resultado = todosTickets.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
             }
 
             Paginacao.Paginar(1, 10, todosTickets.Count());
