@@ -24,8 +24,8 @@ namespace ApiForum.Controllers
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
         }
 
-        [HttpPost("PegarTicket")]
-        public IActionResult TomarPosseDoTicket([FromBody]string TicketID, [FromHeader] string autorToken)
+        [HttpPost("PegarTicket/{TicketID}")]
+        public IActionResult TomarPosseDoTicket(string TicketID, [FromHeader] string autorToken)
         {
             var Core = new TicketCore(_contexto).TomarPosseTicket(autorToken, TicketID);
             return Core.Status ? Ok(Core) : Ok(Core);

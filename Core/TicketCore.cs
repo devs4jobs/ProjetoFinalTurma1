@@ -196,7 +196,7 @@ namespace Core
 
             //verifico se o ticket solicitado existe na base de dados.
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID));
-            if (TicketSolicitado.AtendenteId == null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
+            if (TicketSolicitado.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
 
             //passo o valor para o ticket
             TicketSolicitado.AtendenteId = atendente.Id;
