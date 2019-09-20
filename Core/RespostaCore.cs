@@ -29,9 +29,22 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
+            _resposta.UsuarioId = Guid.Parse(tokenAutor);
+
             var validar = Validate(_resposta);
             if (!validar.IsValid)
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
+
+            var Ticket = _serviceContext.Tickets.FirstOrDefault(x => x.Id == _resposta.TicketId);
+            if (Ticket == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
+
+            var Usuario = _serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId);
+
+
+            if (Usuario.Tipo == "CLIENTE") Ticket.Status=Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
+            else Ticket.Status= Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
+
 
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta enviada!" } };
         }

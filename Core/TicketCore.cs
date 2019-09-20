@@ -68,7 +68,7 @@ namespace Core
             _ticket.NumeroTicket = ConvertNumeroTickets();
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
-          await  _serviceContext.SaveChangesAsync();
+            await  _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
