@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using AutoMapper;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core
 {
@@ -48,23 +49,21 @@ namespace Core
         public async Task<Retorno> CadastrarTicket(string Usertoken)
         {
             //verifico login.
-            if (!Autorizacao.GuidValidation(Usertoken))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+            if (!Autorizacao.ValidarUsuario(Usertoken,_serviceContext))
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada! ,Usuario não existe" } };
 
             //verifico ticket se é valido.
             var validar = Validate(_ticket);
             if (!validar.IsValid)
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(e => e.ErrorMessage).ToList() };
+
             _ticket.NumeroTicket = ConvertNumeroTickets();
 
             _ticket.ClienteId = Guid.Parse(Usertoken);
             //busco o cliente na base e verifico.
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == _ticket.ClienteId);
 
-            if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
             if (cliente.Tipo != "CLIENTE") return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é do tipo cliente" } };
-
-            _ticket.NumeroTicket = ConvertNumeroTickets();
             
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
@@ -82,13 +81,10 @@ namespace Core
             if (!Autorizacao.GuidValidation(TicketID))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
-            var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
-            if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
-
             var ticketSelecionado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID));
 
             //vejo se o cliente que ta longado é o mesmo que está Atualizando o ticket.
-            if (ticketSelecionado.Id != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+            if (ticketSelecionado.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é o mesmo que postou o ticket!" } };
 
             _mapper.Map(ticketView, ticketSelecionado);
             _serviceContext.SaveChanges();
@@ -104,17 +100,16 @@ namespace Core
             if (!Autorizacao.GuidValidation(TicketID))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
-            var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
-            if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
+            _ticket = _serviceContext.Tickets.Include(c=>c.Cliente).FirstOrDefault(t => t.Id == Guid.Parse(TicketID));
 
-            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
-            if (cliente.Id != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+            //vejo se o cliente que ta longado é o mesmo que está públicou o ticket.
+            if (Guid.Parse(Usertoken) != _ticket.ClienteId) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não pode deletar esse ticket, pois não é quem postou o mesmo!" } };
 
             //excluo o ticket e salvo alterações.
-            _serviceContext.Tickets.Remove(_serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID)));
+            _serviceContext.Tickets.Remove(_ticket);
             _serviceContext.SaveChanges();
 
-            return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi Deletado com Sucesso!" } };
+            return new Retorno { Status = true, Resultado = new List<string> { $"{_ticket.Cliente.Nome} seu Ticket foi Deletado com Sucesso!" } };
         }
         public Retorno BuscarTicketporID(string Usertoken, string TicketID)
         {
@@ -132,14 +127,13 @@ namespace Core
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID) && t.ClienteId == cliente.Id );
             
-            
 
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
         public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
         {
             //verifico login.
-            if (!Autorizacao.GuidValidation(Usertoken))
+            if (!Autorizacao.ValidarUsuario(Usertoken,_serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             //busco pelo usuario e vejo se ele existe.
@@ -196,7 +190,7 @@ namespace Core
 
             //verifico se o ticket solicitado existe na base de dados.
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID));
-            if (TicketSolicitado.AtendenteId == null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
+            if (TicketSolicitado.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
 
             //passo o valor para o ticket
             TicketSolicitado.AtendenteId = atendente.Id;
@@ -210,7 +204,7 @@ namespace Core
         public Retorno BuscarTicketSemAtendente(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
         {
             //verifico login.
-            if (!Autorizacao.GuidValidation(Usertoken))
+            if (!Autorizacao.ValidarUsuario(Usertoken,_serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             var todosTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null);
