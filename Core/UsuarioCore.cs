@@ -53,6 +53,7 @@ namespace Core
 
             if (usuarioLogin == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
+
             //  Crio o objeto a ser retornado 
             var Resultado = new
             {
