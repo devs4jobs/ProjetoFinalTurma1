@@ -56,7 +56,9 @@ namespace Model.Migrations
 
                     b.Property<string>("Mensagem");
 
-                    b.Property<string>("NumeroTicket");
+                    b.Property<long>("NumeroTicket")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int?>("Status");
 

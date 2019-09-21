@@ -10,8 +10,8 @@ using Model;
 namespace Model.Migrations
 {
     [DbContext(typeof(ServiceContext))]
-    [Migration("20190920173107_Segunda")]
-    partial class Segunda
+    [Migration("20190921182835_Primeira")]
+    partial class Primeira
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -58,7 +58,9 @@ namespace Model.Migrations
 
                     b.Property<string>("Mensagem");
 
-                    b.Property<string>("NumeroTicket");
+                    b.Property<long>("NumeroTicket")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int?>("Status");
 
