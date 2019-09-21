@@ -58,11 +58,6 @@ namespace ApiTicket
 
             app.UseSwagger();
 
-            // Ativa o Swagger UI
-            app.UseSwaggerUI(opt =>
-            {
-                opt.SwaggerEndpoint("/swagger/v1/swagger.json", "Ticket Api");
-            });
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ticket Api");
