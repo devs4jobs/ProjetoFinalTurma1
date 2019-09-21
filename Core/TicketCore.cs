@@ -5,7 +5,6 @@ using Core.Util;
 using System;
 using System.Collections.Generic;
 using AutoMapper;
-using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 namespace Core
@@ -49,7 +48,7 @@ namespace Core
         }
         #endregion
 
-        public async Task<Retorno> CadastrarTicket(string Usertoken)
+        public Retorno CadastrarTicket(string Usertoken)
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
@@ -69,7 +68,7 @@ namespace Core
 
             //add o ticket e salvo alterações.
             _serviceContext.Tickets.Add(_ticket);
-            await _serviceContext.SaveChangesAsync();
+           _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
@@ -89,6 +88,7 @@ namespace Core
             if (ticketSelecionado.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é o mesmo que postou o ticket!" } };
 
             _mapper.Map(ticketView, ticketSelecionado);
+            AtribuiLista(ticketSelecionado);
 
             _serviceContext.SaveChanges();
             return new Retorno { Status = true, Resultado = ticketSelecionado };
@@ -201,7 +201,7 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             //verifico se o Ticket ID é valido.
-            if (!Guid.TryParse(TicketID, out Guid tId))
+            if (!Guid.TryParse(TicketID, out Guid ValidTicketId))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
             //verifico se tem um usuário na base com ID informado e o tipo dele é atendente.
@@ -209,7 +209,7 @@ namespace Core
             if (atendente == null) return new Retorno { Status = false, Resultado = new List<string> { "Atendente não identificado!" } };
 
             //verifico se o ticket solicitado existe na base de dados.
-            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == tId);
+            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == ValidTicketId);
             if (TicketSolicitado.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
 
             //passo o valor para o ticket

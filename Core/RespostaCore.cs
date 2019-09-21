@@ -28,12 +28,6 @@ namespace Core
             RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
             RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
         }
-<<<<<<< HEAD
-
-        //Método para o cadastro de respostas
-=======
-        
->>>>>>> Guilherme
         public Retorno CadastrarResposta(string tokenAutor)
         {
             // o teste para a validacao do usuario
@@ -80,7 +74,7 @@ namespace Core
             var todasRespostas = _serviceContext.Respostas.Where(r => r.Id == result).ToList();
 
             return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = todasRespostas.OrderByDescending(c => c.DataCadastro) };
-        }
+        }   
         // Método para realizar a edição das respostas
         public Retorno EditarResposta(string tokenAutor, string RespostaId, RespostaUpdateView respostaQueVem)
         {
@@ -112,17 +106,17 @@ namespace Core
         }
 
         //Método para deletar uma resposta
-        public Retorno DeletarResposta(string tokenAutor, string ticketId)
+        public Retorno DeletarResposta(string tokenAutor, string RespostaId)
         {
             // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
             // verifico se o guid o ticket é valido
-            if (!Guid.TryParse(ticketId, out Guid result))
+            if (!Guid.TryParse(RespostaId, out Guid result))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
-            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == result);
+            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.Id == result);
             if (umaResposta == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
