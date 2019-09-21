@@ -1,4 +1,5 @@
-﻿using Core.Util;
+﻿using AutoMapper;
+using Core.Util;
 using FluentValidation;
 using Model;
 using System;
@@ -10,20 +11,24 @@ namespace Core
     public class RespostaCore : AbstractValidator<Resposta>
     {
         private Resposta _resposta { get; set; }
+        private IMapper _mapper { get; set; }
         private ServiceContext _serviceContext { get; set; }
+
+        public RespostaCore(ServiceContext ServiceContext, IMapper mapper) { _serviceContext = ServiceContext; _mapper = mapper; }
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
-        public RespostaCore(Resposta Resposta, ServiceContext ServiceContext)
+        public RespostaCore(RespostaView respostaquevem, ServiceContext ServiceContext,IMapper mapper)
         {
+            _mapper = mapper;
             _serviceContext = ServiceContext;
-            _resposta = Resposta;
+            _resposta = _mapper.Map<Resposta>(respostaquevem);
 
-            RuleFor(e => e.Mensagem).MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
-            RuleFor(e => e.TicketId).NotNull().WithMessage("O ticket Id nao pode ser nulo!");
-            RuleFor(e => e.UsuarioId).NotNull().WithMessage("o Usuario Id nao pode ser nulo!");
+
+            RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
+            RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
         }
-        
+
         //Método para o cadastro de respostas
         public Retorno CadastrarResposta(string tokenAutor)
         {
@@ -35,7 +40,7 @@ namespace Core
             if (!validar.IsValid)
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
 
-           // vejo se o ticket é valido
+            // vejo se o ticket é valido
 
             var Ticket = _serviceContext.Tickets.FirstOrDefault(x => x.Id == _resposta.TicketId);
             if (Ticket == null)
@@ -47,14 +52,14 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
 
             // defino o status da resposta baseando se na pessoa que esta enviando 
-            if (_serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId).Tipo == "CLIENTE") Ticket.Status=Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
-            else Ticket.Status= Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
+            if (_serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId).Tipo == "CLIENTE") Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
+            else Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
 
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta enviada!" } };
         }
 
         //Método para buscar todas as respostas daquele ticket em especificio 
-        public Retorno BuscarRespostas(string tokenAutor, string ticketId )
+        public Retorno BuscarRespostas(string tokenAutor, string ticketId)
         {
             // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
@@ -70,36 +75,33 @@ namespace Core
             return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = todasRespostas.OrderByDescending(c => c.DataCadastro) };
         }
         // Método para realizar a edição das respostas
-        public Retorno EditarResposta(string tokenAutor, string ticketId, Resposta resposta)
+        public Retorno EditarResposta(string tokenAutor, string RespostaId, RespostaUpdateView respostaQueVem)
         {
             // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
             // verifico se o guid o ticket é valido
-            if (!Guid.TryParse(ticketId, out Guid result))
+            if (!Guid.TryParse(RespostaId, out Guid result))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
-            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == result);
+            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.Id == result);
 
-            if (umaResposta == null )
+            if (umaResposta == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para editar negada, só o autor da resposta pode edita-la" } };
 
-            // try catch caso a mensagem da reposta vir nula
-            try
-            {
-                if (resposta.Mensagem.Length < 10)
-                    return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
-            }
-            catch (Exception) { return new Retorno { Status = false, Resultado = new List<string> { "A resposta não pode ser nula!" } }; }
-           
-            if (resposta.Mensagem != null)
-                umaResposta.Mensagem = resposta.Mensagem;
+            _mapper.Map(respostaQueVem, umaResposta);
 
-            return new Retorno { Status = true, Resultado = new List<string> { "Resposta editada com sucesso!" } };
+
+            if (umaResposta.Mensagem.Length < 10)
+                return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
+
+            _serviceContext.SaveChanges();
+
+            return new Retorno { Status = true, Resultado = umaResposta};
         }
 
         //Método para deletar uma resposta
