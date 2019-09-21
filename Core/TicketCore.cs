@@ -8,7 +8,6 @@ using AutoMapper;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-
 namespace Core
 {
     /// <summary>
@@ -29,13 +28,17 @@ namespace Core
         }
 
 
-        public TicketCore(Ticket ticket, ServiceContext serviceContext)
+        public TicketCore(TicketView ticket, ServiceContext serviceContext, IMapper mapper)
         {
-            _ticket = ticket;
+            _mapper = mapper;
+            _ticket = _mapper.Map<TicketView,Ticket>(ticket);
             _serviceContext = serviceContext;
 
             RuleFor(t => t.Titulo).NotNull()
                 .WithMessage("O título do ticket não pode ser nulo.");
+
+            RuleFor(t => t.Mensagem).NotNull()
+                .WithMessage("A Mensagem do ticket não pode ser nula , deve haver uma descrição.");
 
             RuleFor(t => t.NumeroTicket).Null()
                 .WithMessage("Número do Ticket será nulo quando criamos ele elaboramos uma identificação unica.");
@@ -58,7 +61,6 @@ namespace Core
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(e => e.ErrorMessage).ToList() };
 
             _ticket.NumeroTicket = ConvertNumeroTickets();
-
             _ticket.ClienteId = Guid.Parse(Usertoken);
             //busco o cliente na base e verifico.
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == _ticket.ClienteId);
@@ -71,7 +73,7 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
-        public Retorno AtualizarTicket(string Usertoken, string TicketID, Ticket ticketView)
+        public Retorno AtualizarTicket(string Usertoken, string TicketID, TicketUpadateView ticketView)
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
@@ -87,6 +89,7 @@ namespace Core
             if (ticketSelecionado.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é o mesmo que postou o ticket!" } };
 
             _mapper.Map(ticketView, ticketSelecionado);
+
             _serviceContext.SaveChanges();
             return new Retorno { Status = true, Resultado = ticketSelecionado };
         }
@@ -126,7 +129,8 @@ namespace Core
 
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket.
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == Guid.Parse(TicketID) && t.ClienteId == cliente.Id );
-            
+
+
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
         public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro)

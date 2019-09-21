@@ -1,4 +1,5 @@
-﻿using Core.Util;
+﻿using AutoMapper;
+using Core.Util;
 using FluentValidation;
 using Model;
 using System.Collections.Generic;
@@ -9,14 +10,16 @@ namespace Core
     public class UsuarioCore : AbstractValidator<Usuario>
     {
         private Usuario _usuario { get; set; }
+        private IMapper _mapper { get; set; }
         public ServiceContext _dbcontext { get; set; }
 
         public UsuarioCore(ServiceContext Context) => _dbcontext = Context;
 
-        public UsuarioCore(Usuario Usuario, ServiceContext Context)
+        public UsuarioCore(UsuarioView Usuario, ServiceContext Context,IMapper mapper)
         {
+            _mapper = mapper;
             _dbcontext = Context;
-            _usuario = Usuario;
+            _usuario = _mapper.Map<UsuarioView,Usuario>(Usuario);
 
             RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O Nome deve ter no minimo 3 letras!");
             RuleFor(u => u.Email).EmailAddress().NotNull().WithMessage("Email inválido.");
@@ -46,10 +49,10 @@ namespace Core
         }
 
         //Método para logar o usuario na plataforma.
-        public Retorno LogarUsuario()
+        public Retorno LogarUsuario(LoginView loginView)
         {
             //Vejo se o login esta correto, se nao ja retorno uma mensagem.
-            var usuarioLogin = _dbcontext.Usuarios.FirstOrDefault(u => u.Email == _usuario.Email && u.Senha == _usuario.Senha);
+            var usuarioLogin = _dbcontext.Usuarios.FirstOrDefault(u => u.Email == loginView.Email && u.Senha == loginView.Senha);
 
             if (usuarioLogin == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };

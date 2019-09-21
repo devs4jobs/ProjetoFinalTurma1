@@ -1,4 +1,4 @@
-﻿ using AutoMapper;
+﻿using AutoMapper;
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
@@ -13,16 +13,14 @@ namespace ApiForum.Controllers
         private ServiceContext _contexto { get; set; }
         private readonly IMapper _Mapper;
 
-
-
         // construtor para a utilização do automapper por meio de injeçao de dependecia
         public TicketsController(ServiceContext contexto, IMapper mapper) { _contexto = contexto; _Mapper = mapper; }
 
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
-        public IActionResult CadastrarTicket([FromBody] Ticket ticket, [FromHeader] string autorToken)
+        public IActionResult CadastrarTicket([FromBody] TicketView ticket, [FromHeader] string autorToken)
         {
-            var Core = new TicketCore(ticket, _contexto).CadastrarTicket(autorToken).Result;
+            var Core = new TicketCore(ticket, _contexto, _Mapper).CadastrarTicket(autorToken).Result;
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
         }
 
@@ -34,7 +32,7 @@ namespace ApiForum.Controllers
         }
 
         [HttpGet("{TicketID}")]
-      
+
         public IActionResult GetIdTicket([FromHeader]string autorToken, string TicketID)
         {
             var Core = new TicketCore(_contexto).BuscarTicketporID(autorToken, TicketID);
@@ -43,7 +41,7 @@ namespace ApiForum.Controllers
 
         //Chamando o metodo de listar todos da core 
         [HttpGet]
-        public IActionResult GetTodosTickets([FromHeader]string autorToken,[FromQuery] int numeroPagina,[FromQuery]int quantidadePagina)
+        public IActionResult GetTodosTickets([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina)
         {
             var Core = new TicketCore(_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina);
             return Core.Status ? Ok(Core) : Ok(Core);
@@ -58,9 +56,9 @@ namespace ApiForum.Controllers
         }
 
         [HttpPut("{TicketID}")]
-        public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID,[FromBody] Ticket ticket)
+        public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID, [FromBody] TicketUpadateView ticket)
         {
-            var Core = new TicketCore(_Mapper,_contexto).AtualizarTicket(autorToken, TicketID, ticket);
+            var Core = new TicketCore(_Mapper, _contexto).AtualizarTicket(autorToken, TicketID, ticket);
             return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);
         }
 
