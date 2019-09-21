@@ -9,8 +9,8 @@ namespace Core
 {
     public class RespostaCore : AbstractValidator<Resposta>
     {
-        private Resposta _resposta;
-        public ServiceContext _serviceContext { get; set; }
+        private Resposta _resposta { get; set; }
+        private ServiceContext _serviceContext { get; set; }
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
@@ -23,9 +23,11 @@ namespace Core
             RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
             RuleFor(e => e.UsuarioId).NotNull().WithMessage("o Usuario Id nao pode ser nulo!");
         }
-
+        
+        //Método para o cadastro de respostas
         public Retorno CadastrarResposta(string tokenAutor)
         {
+            // o teste para a validacao do usuario
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
@@ -33,32 +35,60 @@ namespace Core
             if (!validar.IsValid)
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
 
+           // vejo se o ticket é valido
+
+            var Ticket = _serviceContext.Tickets.FirstOrDefault(x => x.Id == _resposta.TicketId);
+            if (Ticket == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
+
+            _resposta.UsuarioId = Guid.Parse(tokenAutor);
+
+            if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
+                return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
+
+            // defino o status da resposta baseando se na pessoa que esta enviando 
+            if (_serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId).Tipo == "CLIENTE") Ticket.Status=Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
+            else Ticket.Status= Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
+
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta enviada!" } };
         }
 
-        public Retorno BuscarRespostas(string tokenAutor, string id)
+        //Método para buscar todas as respostas daquele ticket em especificio 
+        public Retorno BuscarRespostas(string tokenAutor, string ticketId )
         {
+            // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            if (!Autorizacao.GuidValidation(id))
-                return new Retorno { Status = false, Resultado = new List<string> { "Id do ticket inválido" } };
+            // verifico se o guid o ticket é valido
+            if (!Guid.TryParse(ticketId, out Guid result))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
-            var todasRespostas = _serviceContext.Respostas.Where(r => r.Id == Guid.Parse(id)).ToList();
+            // busco por todas as respotas e faço o teste se esse ticket tem respostas
+            var todasRespostas = _serviceContext.Respostas.Where(r => r.Id == result).ToList();
 
-            return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = todasRespostas };
+            return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = todasRespostas.OrderByDescending(c => c.DataCadastro) };
         }
-
+        // Método para realizar a edição das respostas
         public Retorno EditarResposta(string tokenAutor, string ticketId, Resposta resposta)
         {
+            // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == Guid.Parse(ticketId));
+            // verifico se o guid o ticket é valido
+            if (!Guid.TryParse(ticketId, out Guid result))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
+
+            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == result);
+
+            if (umaResposta == null )
+                return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para editar negada, só o autor da resposta pode edita-la" } };
 
+            // try catch caso a mensagem da reposta vir nula
             try
             {
                 if (resposta.Mensagem.Length < 10)
@@ -72,12 +102,20 @@ namespace Core
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta editada com sucesso!" } };
         }
 
+        //Método para deletar uma resposta
         public Retorno DeletarResposta(string tokenAutor, string ticketId)
         {
+            // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
 
-            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == Guid.Parse(ticketId));
+            // verifico se o guid o ticket é valido
+            if (!Guid.TryParse(ticketId, out Guid result))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
+
+            var umaResposta = _serviceContext.Respostas.FirstOrDefault(c => c.TicketId == result);
+            if (umaResposta == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para deletar negada, só o autor da resposta pode deleta-la" } };
