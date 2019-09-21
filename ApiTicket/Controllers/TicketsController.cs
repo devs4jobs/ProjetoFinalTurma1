@@ -11,10 +11,12 @@ namespace ApiForum.Controllers
     {
         //Construtor contendo o contexto.
         private ServiceContext _contexto { get; set; }
-        private IMapper _Mapper { get; set; }
+        private readonly IMapper _Mapper;
+
+
 
         // construtor para a utilização do automapper por meio de injeçao de dependecia
-        public TicketsController(ServiceContext contexto) => _contexto = contexto;
+        public TicketsController(ServiceContext contexto, IMapper mapper) { _contexto = contexto; _Mapper = mapper; }
 
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
@@ -24,8 +26,8 @@ namespace ApiForum.Controllers
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
         }
 
-        [HttpPost("PegarTicket")]
-        public IActionResult TomarPosseDoTicket([FromBody]string TicketID, [FromHeader] string autorToken)
+        [HttpPost("PegarTicket/{TicketID}")]
+        public IActionResult TomarPosseDoTicket(string TicketID, [FromHeader] string autorToken)
         {
             var Core = new TicketCore(_contexto).TomarPosseTicket(autorToken, TicketID);
             return Core.Status ? Ok(Core) : Ok(Core);

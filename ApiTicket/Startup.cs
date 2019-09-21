@@ -37,6 +37,7 @@ namespace ApiTicket
                     .ForMember(dest => dest.ClienteId, opt => opt.Ignore())
                     .ForMember(dest => dest.AtendenteId, opt => opt.Ignore())
                     .ForMember(dest => dest.LstRespostas, opt => opt.Ignore())
+                    .ForMember(dest => dest.NumeroTicket, opt => opt.Ignore())
                     .ForMember(dest => dest.Avaliacao, opt => opt.Condition(ori => ori.Avaliacao != null))
                     .ForMember(dest => dest.Status, opt => opt.Condition(ori => ori.Status != null))
                     .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null));
@@ -57,11 +58,6 @@ namespace ApiTicket
 
             app.UseSwagger();
 
-            // Ativa o Swagger UI
-            app.UseSwaggerUI(opt =>
-            {
-                opt.SwaggerEndpoint("/swagger/v1/swagger.json", "Ticket Api");
-            });
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ticket Api");
