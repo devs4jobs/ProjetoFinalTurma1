@@ -28,12 +28,10 @@ namespace Core
             RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
             RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
         }
-<<<<<<< HEAD
+
 
         //Método para o cadastro de respostas
-=======
-        
->>>>>>> Guilherme
+
         public Retorno CadastrarResposta(string tokenAutor)
         {
             // o teste para a validacao do usuario
@@ -52,7 +50,7 @@ namespace Core
 
             _resposta.UsuarioId = Guid.Parse(tokenAutor);
 
-            if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
+            if (Ticket.ClientId != _resposta.UsuarioId && Ticket.AtendentId != _resposta.UsuarioId)
                 return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
 
             // defino o status da resposta baseando se na pessoa que esta enviando 

@@ -20,7 +20,7 @@ namespace ApiForum.Controllers
         [HttpPost]
         public IActionResult CadastrarTicket([FromBody] TicketView ticket, [FromHeader] string autorToken)
         {
-            var Core = new TicketCore(ticket, _contexto, _Mapper).CadastrarTicket(autorToken).Result;
+            var Core = new TicketCore(ticket, _contexto, _Mapper).CadastrarTicket(autorToken);
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
         }
 
