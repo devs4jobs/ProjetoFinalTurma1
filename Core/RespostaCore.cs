@@ -20,7 +20,7 @@ namespace Core
             _resposta = Resposta;
 
             RuleFor(e => e.Mensagem).MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
-            RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
+            RuleFor(e => e.TicketId).NotNull().WithMessage("O ticket Id nao pode ser nulo!");
             RuleFor(e => e.UsuarioId).NotNull().WithMessage("o Usuario Id nao pode ser nulo!");
         }
         

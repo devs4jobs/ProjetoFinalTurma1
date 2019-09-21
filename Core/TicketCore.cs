@@ -279,15 +279,14 @@ namespace Core
         }
 
         //metodo para fazer uma identificação unica de cada usuário.
-        public string ConvertNumeroTickets()
+        public long ConvertNumeroTickets()
         {
-            var dataString = DateTime.Now.ToString("MMyyyy", CultureInfo.CreateSpecificCulture("pt-BR")); ;
+            var dataString = DateTime.Now.ToString("yyyyMM"); ;
 
-            //aqui eu faço um calculo com números aleatórios. 
-            var number = 7 * new Random().Next(1000000, 9999999) / 100;
+            var number = _serviceContext.Tickets.Last().NumeroTicket + 1;
 
             //aqui retornamos o dia e o ano junto com o resultado dos calculos.
-            return dataString + number.ToString("D");
+            return long.Parse(dataString + number.ToString().Substring(6));
         }
 
     }

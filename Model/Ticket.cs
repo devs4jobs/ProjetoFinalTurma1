@@ -9,7 +9,8 @@ namespace Model
     /// </summary>
     public class Ticket : Base
     {
-        public string NumeroTicket { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long NumeroTicket { get; set; }
         public Usuario Cliente { get; set; }
         [ForeignKey("Usuarios")]
         public Guid? ClienteId { get; set; }
