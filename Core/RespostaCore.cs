@@ -28,8 +28,12 @@ namespace Core
             RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
             RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
         }
+<<<<<<< HEAD
 
         //Método para o cadastro de respostas
+=======
+        
+>>>>>>> Guilherme
         public Retorno CadastrarResposta(string tokenAutor)
         {
             // o teste para a validacao do usuario
@@ -54,6 +58,9 @@ namespace Core
             // defino o status da resposta baseando se na pessoa que esta enviando 
             if (_serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId).Tipo == "CLIENTE") Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
             else Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
+
+            _serviceContext.Add(_resposta);
+            _serviceContext.SaveChanges();
 
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta enviada!" } };
         }

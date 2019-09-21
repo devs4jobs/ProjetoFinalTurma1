@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Model.Migrations
@@ -29,12 +30,12 @@ namespace Model.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     DataCadastro = table.Column<DateTime>(nullable: false),
-                    NumeroTicket = table.Column<string>(nullable: true),
+                    NumeroTicket = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ClienteId = table.Column<Guid>(nullable: true),
                     AtendenteId = table.Column<Guid>(nullable: true),
                     Status = table.Column<int>(nullable: true),
                     Titulo = table.Column<string>(nullable: true),
-                    Tipo = table.Column<string>(nullable: true),
                     Mensagem = table.Column<string>(nullable: true),
                     Avaliacao = table.Column<int>(nullable: true)
                 },
@@ -62,8 +63,8 @@ namespace Model.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     DataCadastro = table.Column<DateTime>(nullable: false),
                     Mensagem = table.Column<string>(nullable: true),
-                    TicketId = table.Column<Guid>(nullable: false),
-                    UsuarioId = table.Column<Guid>(nullable: false)
+                    TicketId = table.Column<Guid>(nullable: true),
+                    UsuarioId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -73,13 +74,13 @@ namespace Model.Migrations
                         column: x => x.TicketId,
                         principalTable: "Tickets",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Respostas_Usuarios_UsuarioId",
                         column: x => x.UsuarioId,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
