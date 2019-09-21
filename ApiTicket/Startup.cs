@@ -24,14 +24,22 @@ namespace ApiTicket
                 options.SerializerSettings.DateFormatString = "dd/MM/yyyy";
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
                     });
+
             services.AddDbContext<ServiceContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StringConexao")), ServiceLifetime.Scoped);
+
             services.AddSwaggerGen(s =>
             {
                 s.SwaggerDoc("v1", new Info { Title = "Ticket Api", Version = "v1" });
             });
+
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Ticket, Ticket>()
+                cfg.CreateMap<UsuarioView, Usuario>();
+
+                cfg.CreateMap<LoginView, Usuario>();
+
+
+                cfg.CreateMap<TicketUpadateView, Ticket>()
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
                     .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
                     .ForMember(dest => dest.ClienteId, opt => opt.Ignore())
@@ -40,7 +48,20 @@ namespace ApiTicket
                     .ForMember(dest => dest.NumeroTicket, opt => opt.Ignore())
                     .ForMember(dest => dest.Avaliacao, opt => opt.Condition(ori => ori.Avaliacao != null))
                     .ForMember(dest => dest.Status, opt => opt.Condition(ori => ori.Status != null))
-                    .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null));
+                    .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null))
+                    .ForMember(dest => dest.Mensagem , opt => opt.Condition(ori => ori.Mensagem != null));
+
+                cfg.CreateMap<TicketView, Ticket>();
+
+
+                cfg.CreateMap<RespostaView, Resposta>();
+                cfg.CreateMap<RespostaUpdateView, Resposta>()
+                     .ForMember(dest => dest.Id, opt => opt.Ignore())
+                    .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
+                    .ForMember(dest => dest.TicketId, opt => opt.Ignore())
+                    .ForMember(dest => dest.UsuarioId, opt => opt.Ignore())
+                    .ForMember(dest => dest.Mensagem, opt => opt.Condition(ori => ori.Mensagem != null));
+
             });
             IMapper mapper = config.CreateMapper();
             services.AddSingleton(mapper);

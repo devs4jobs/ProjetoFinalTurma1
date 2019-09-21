@@ -1,6 +1,8 @@
-﻿using Core;
+﻿using AutoMapper;
+using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using System.Dynamic;
 
 namespace ApiForum.Controllers
 {
@@ -9,23 +11,25 @@ namespace ApiForum.Controllers
     public class UsuariosController : ControllerBase
     {
         //Construtor contendo o contexto.
-        private ServiceContext _contexto { get; set; }
-    
-        // construtor para a utilização do automapper por meio de injeçao de dependecia
-        public UsuariosController(ServiceContext contexto) =>  _contexto = contexto;
+        private ServiceContext _contexto { get; set; }  
+        private readonly IMapper _mapper;
 
-        // Cadastrar um usuario
+        // construtor para a utilização do automapper por meio de injeçao de dependecia
+        public UsuariosController(ServiceContext service, IMapper mapper) { _contexto = service; _mapper = mapper; }
+
+        // Cadastrar um usuarioto
         [HttpPost]
-        public IActionResult Cadastro([FromBody] Usuario Usuario)
+        public IActionResult Cadastro([FromBody] UsuarioView usuarioView  )
         {
-            var Core = new UsuarioCore(Usuario, _contexto).CadastrarUsuario();
+            var Core = new UsuarioCore(usuarioView, _contexto,_mapper).CadastrarUsuario();
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", Core) : (IActionResult)Ok(Core);
         }
+
         //Chamando o metodo de logar usurario da core 
         [HttpPost("Autenticar")]
-        public IActionResult Logar([FromBody] Usuario usuario)
+        public IActionResult Logar([FromBody] LoginView loginView)
         {
-            var Core = new UsuarioCore(usuario, _contexto).LogarUsuario();
+            var Core = new UsuarioCore(_contexto).LogarUsuario(loginView);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
     }
