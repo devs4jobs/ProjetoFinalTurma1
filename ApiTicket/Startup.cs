@@ -21,7 +21,7 @@ namespace ApiTicket
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddMvc().AddJsonOptions(options => {
-                options.SerializerSettings.DateFormatString = "dd/MM/yyyy";
+                options.SerializerSettings.DateFormatString = "HH:mm:ss,dd/MM/yyyy";
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
                     });
 

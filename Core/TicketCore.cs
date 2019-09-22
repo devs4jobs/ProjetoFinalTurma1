@@ -125,11 +125,8 @@ namespace Core
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
             if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
-
-         
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
-            var TicketSolicitado = _serviceContext.Tickets
-                .FirstOrDefault(t => t.Id == tId && t.ClientId == cliente.Id || t.Id == tId && t.AtendentId == cliente.Id);
+            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == tId && t.ClientId == cliente.Id || t.Id == tId && t.AtendentId == cliente.Id);
 
             AtribuiLista(TicketSolicitado);
 
@@ -158,10 +155,6 @@ namespace Core
                 var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
                 && t.AtendentId == Guid.Parse(Usertoken)).ToList();
 
-                ticketsAtendente.ForEach(c => AtribuiLista(c));
-
-                _serviceContext.SaveChanges();
-
                 // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
                 if (NumeroPagina > 0 && QuantidadeRegistro > 0)
                 {
@@ -177,9 +170,6 @@ namespace Core
             // busco pelos tickets daquele especifico usuario 
 
             var ticketsCliente = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("ABERTO") || c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE") && c.ClientId == Guid.Parse(Usertoken)).ToList();
-
-            ticketsCliente.ForEach(c => AtribuiLista(c));
-            _serviceContext.SaveChanges();
 
             // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
             if (NumeroPagina > 0 && QuantidadeRegistro > 0)
@@ -225,7 +215,7 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             var todosTickets = _serviceContext.Tickets.Where(c => c.AtendentId == null && c.Status != Enum.Parse<Status>("FECHADO")).ToList();
-            todosTickets.ForEach(c => AtribuiLista(c));
+           // todosTickets.ForEach(c => AtribuiLista(c));
             
               // nova instancia da paganicação
               var Paginacao = new Paginacao();
@@ -303,6 +293,7 @@ namespace Core
             catch (Exception) { return long.Parse(dataString + (1).ToString("D6")); }
         }
 
+        //Método para realizar a atribuicao na lista da lista de respostas no tciket
         public void AtribuiLista(Ticket ticket)
         {
             var ListaResposta = _serviceContext.Respostas.Where(c => c.TicketId == ticket.Id).ToList();
@@ -325,7 +316,9 @@ namespace Core
                     Resposta.Usuario = new UsuarioRetorno { Nome = oUsuario.Nome, Email = oUsuario.Email };
             }
 
-            ticket.LstRespostas = ListaResposta;
+            ticket.LstRespostas = ListaResposta.OrderBy(c => c.DataCadastro).ToList();
+            ticket.Atendent = null;
+            ticket.Client = null;
         }
     }
 }

@@ -9,7 +9,5 @@ namespace Model
     {
         public string Nome { get; set; }
         public string Email { get; set; }
-        [JsonIgnore]
-        public Guid Id { get; set; }
     }
 }
