@@ -154,7 +154,7 @@ namespace Core
             {
                 // busco pelos tickets daquele especifico usuario 
 
-                var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
+                var ticketsAtendente = _serviceContext.Tickets.Where(t => (t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE"))
                 && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
 
                 // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
@@ -169,7 +169,7 @@ namespace Core
                 var retorno1 = _mapper.Map<List<TicketRetorno>>(ticketsAtendente.Take(10));
                 retorno1.ForEach(t => t.LstRespostas = null);
 
-                return new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno1 };
+                return retorno1.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "VocÊ nao tem tickets no momento!" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno1 };
             }
             // busco pelos tickets daquele especifico usuario 
 
@@ -305,7 +305,7 @@ namespace Core
 
             var Ticket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == UltimaResposta.TicketId);
 
-            Ticket.AtendentId = Guid.Parse(tokenAutor);
+            Ticket.AtendenteId = Guid.Parse(tokenAutor);
 
             _serviceContext.SaveChanges();
 
