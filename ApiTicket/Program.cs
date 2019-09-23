@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace ApiTicket
 {
+#pragma warning disable CS1591
     public class Program
     {
         public static void Main(string[] args) =>  CreateWebHostBuilder(args).Build().Run();

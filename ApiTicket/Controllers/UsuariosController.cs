@@ -2,10 +2,9 @@
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
-using System.Dynamic;
-
 namespace ApiForum.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
@@ -23,11 +22,13 @@ namespace ApiForum.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /Todo
+        ///     Post/Usuarios 
         ///     {
-        ///        "id": 1,
-        ///        "name": "Item1",
-        ///        "isComplete": true
+        ///       "nome": "string",
+        ///       "email": "string",
+        ///       "senha": "string",
+        ///       "confirmaSenha": "string",
+        ///       "tipo": "string"  
         ///     }
         ///
         /// </remarks>
@@ -39,7 +40,20 @@ namespace ApiForum.Controllers
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", Core) : (IActionResult)Ok(Core);
         }
 
-        //Chamando o metodo de logar usurario da core 
+        /// <summary>
+        /// Criar Usuário.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        /// Post/Usuarios/Autenticar
+        ///
+        ///      {
+        ///        "email": "string",
+        ///        "senha": "string"
+        ///      }
+        /// </remarks>
+        /// <param name="loginView"></param>
         [HttpPost("Autenticar")]
         public IActionResult Logar([FromBody] LoginView loginView)
         {

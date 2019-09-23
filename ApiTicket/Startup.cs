@@ -5,8 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.StaticFiles;
 using Model;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.Reflection;
+using System.IO;
 
 namespace ApiTicket
 {
@@ -22,7 +26,7 @@ namespace ApiTicket
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddMvc().AddJsonOptions(options =>
             {
-                options.SerializerSettings.DateFormatString = "HH:mm:ss,dd/MM/yyyy";
+                options.SerializerSettings.DateFormatString = "HH:mm,dd/MM/yyyy";
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             });
 
@@ -43,12 +47,6 @@ namespace ApiTicket
                 //mapeamento dos tickets
                 cfg.CreateMap<TicketView, Ticket>();
                 cfg.CreateMap<TicketUpadateView, Ticket>()
-                    .ForMember(dest => dest.Id, opt => opt.Ignore())
-                    .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
-                    .ForMember(dest => dest.ClienteId, opt => opt.Ignore())
-                    .ForMember(dest => dest.AtendenteId, opt => opt.Ignore())
-                    .ForMember(dest => dest.LstRespostas, opt => opt.Ignore())
-                    .ForMember(dest => dest.NumeroTicket, opt => opt.Ignore())
                     .ForMember(dest => dest.Avaliacao, opt => opt.Condition(ori => ori.Avaliacao != null))
                     .ForMember(dest => dest.Status, opt => opt.Condition(ori => ori.Status != null))
                     .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null))
@@ -62,10 +60,6 @@ namespace ApiTicket
                 cfg.CreateMap<RespostaView, Resposta>();
                 cfg.CreateMap<Resposta, RespostaRetorno>();
                 cfg.CreateMap<RespostaUpdateView, Resposta>()
-                    .ForMember(dest => dest.Id, opt => opt.Ignore())
-                    .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
-                    .ForMember(dest => dest.TicketId, opt => opt.Ignore())
-                    .ForMember(dest => dest.UsuarioId, opt => opt.Ignore())
                     .ForMember(dest => dest.Mensagem, opt => opt.Condition(ori => ori.Mensagem != null));
             });
             IMapper mapper = config.CreateMapper();
@@ -80,8 +74,13 @@ namespace ApiTicket
             else
                 app.UseHsts();
 
+            app.UseStaticFiles();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ticket Api");

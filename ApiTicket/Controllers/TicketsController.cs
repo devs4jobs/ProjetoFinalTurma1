@@ -2,9 +2,9 @@
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
-
 namespace ApiForum.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class TicketsController : ControllerBase
@@ -18,6 +18,20 @@ namespace ApiForum.Controllers
 
         //Chamando o metodo de cadastar usurario da core 
         [HttpPost]
+        /// <summary>
+        /// CriarTicket
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     Post/Tickets
+        ///     {
+        ///       "titulo": "string",
+        ///       "mensagem": "string",
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="ticket"></param>
         public IActionResult CadastrarTicket([FromBody] TicketView ticket, [FromHeader] string autorToken)
         {
             var Core = new TicketCore(ticket, _contexto, _Mapper).CadastrarTicket(autorToken);
@@ -48,6 +62,22 @@ namespace ApiForum.Controllers
         }
 
         [HttpPut("{TicketID}")]
+        /// <summary>
+        /// atualizar Ticket
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     Put/Tickets/{TicketId}
+        ///     {
+        ///       "titulo": "string",
+        ///       "mensagem": "string",
+        ///       "avaliacao": 0,
+        ///       "status": 1,
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="ticket"></param>
         public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID, [FromBody] TicketUpadateView ticket)
         {
             var Core = new TicketCore(_Mapper, _contexto).AtualizarTicket(autorToken, TicketID, ticket);
