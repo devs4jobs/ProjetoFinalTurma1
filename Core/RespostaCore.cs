@@ -100,7 +100,6 @@ namespace Core
 
             _mapper.Map(respostaQueVem, umaResposta);
 
-
             if (umaResposta.Mensagem.Length < 10)
                 return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
 
@@ -125,7 +124,7 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização para deletar negada, só o autor da resposta pode deleta-la" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização para deletar negada, só o autor da resposta pode deletá-la" } };
 
             _serviceContext.Respostas.Remove(umaResposta);
             _serviceContext.SaveChanges();
