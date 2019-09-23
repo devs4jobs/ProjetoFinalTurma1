@@ -255,6 +255,8 @@ namespace Core
 
             Oticket.Avaliacao = result;
 
+            _serviceContext.SaveChanges();
+
             return new Retorno { Status = true, Resultado = new List<string> { "Avaliação registrada com sucesso!" } };
         }
 
@@ -281,12 +283,34 @@ namespace Core
             return new Retorno { Status = true, Resultado = new List<string> { "Ticket fechado com sucesso!" } };
         }
 
+        public Retorno TrocarAtendente(string Numero,string tokenAutor)
+        {
+            if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
+                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+
+            if (!long.TryParse(Numero, out long Result)||_serviceContext.Tickets.Any(c=>c.NumeroTicket==Result))
+                return new Retorno { Status = false, Resultado = new List<string> { "Numero não existe na base de dados" } };
+
+            var UltimaResposta =_serviceContext.Respostas.Include(c=>c.Usuario).Where(c=>c.TicketId==_serviceContext.Tickets.FirstOrDefault(d => d.NumeroTicket == Result).Id).OrderBy(c=>c.DataCadastro).Last();
+
+            if (UltimaResposta.Usuario.Tipo == "ATENDENTE"||(UltimaResposta.Usuario.Tipo=="CLIENTE"&&UltimaResposta.DataCadastro.AddDays(14)<DateTime.Now))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ultima Mensagem é do atendente ou Ultima Mensagem do cliente foi em menos de 14 dias" } };
+
+            var Ticket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == UltimaResposta.TicketId);
+
+            Ticket.AtendenteId = Guid.Parse(tokenAutor);
+
+            _serviceContext.SaveChanges();
+
+            return new Retorno { Status = true, Resultado = new List<string> { $"Ticket Numero: {Ticket.NumeroTicket} atualizado, você agora é o atendente deste ticket" } };
+        }
+
         //metodo para fazer uma identificação unica de cada usuário.
         public long ConvertNumeroTickets()
         {
             var dataString = DateTime.Now.ToString("yyyyMM"); ;
 
-            var number = _serviceContext.Tickets.Last().NumeroTicket + 1;
+            var number = _serviceContext.Tickets.OrderBy(c=>c.NumeroTicket).Last().NumeroTicket + 1;
 
             //aqui retornamos o dia e o ano junto com o resultado dos calculos.
             return long.Parse(dataString + number.ToString().Substring(6));
