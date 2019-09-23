@@ -26,7 +26,7 @@ namespace ApiForum.Controllers
         [HttpGet("{RespostaID}")]
         public IActionResult GetIdResposta([FromHeader]string autorToken, string RespostaID)
         {
-            var Core = new RespostaCore(_contexto).BuscarRespostas(autorToken, RespostaID);
+            var Core = new RespostaCore(_contexto,_mapper).BuscarRespostas(autorToken, RespostaID);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 

@@ -54,13 +54,14 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
 
             // defino o status da resposta baseando se na pessoa que esta enviando 
-            if (_serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId).Tipo == "CLIENTE") Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
+            _resposta.Usuario =  _serviceContext.Usuarios.FirstOrDefault(x => x.Id == _resposta.UsuarioId);
+            if ( _resposta.Usuario.Tipo == "CLIENTE") Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
             else Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
 
             _serviceContext.Add(_resposta);
             _serviceContext.SaveChanges();
 
-            return new Retorno { Status = true, Resultado = new List<string> { "Resposta enviada!" } };
+            return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(_resposta) };
         }
 
         //Método para buscar todas as respostas daquele ticket em especificio 
@@ -77,7 +78,7 @@ namespace Core
             // busco por todas as respotas e faço o teste se esse ticket tem respostas
             var todasRespostas = _serviceContext.Respostas.Where(r => r.Id == result).ToList();
 
-            return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = todasRespostas.OrderByDescending(c => c.DataCadastro) };
+            return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = _mapper.Map<List<RespostaRetorno>>(todasRespostas.OrderByDescending(c => c.DataCadastro)) };
         }   
         // Método para realizar a edição das respostas
         public Retorno EditarResposta(string tokenAutor, string RespostaId, RespostaUpdateView respostaQueVem)
@@ -106,7 +107,7 @@ namespace Core
 
             _serviceContext.SaveChanges();
 
-            return new Retorno { Status = true, Resultado = umaResposta};
+            return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(umaResposta)};
         }
 
         //Método para deletar uma resposta
