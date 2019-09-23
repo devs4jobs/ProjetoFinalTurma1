@@ -161,11 +161,11 @@ namespace Core
                 List<Ticket> ticketsAtendente;
                 // busco pelos tickets daquele especifico usuario 
                 if (StatusAtual == "FECHADO")
-                    ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("FECHADO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+                    ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("FECHADO") && t.AtendenteId == usuario.Id).ToList();
 
                 else if (StatusAtual == "ANDAMENTO")
                     ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
-                    && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+                    && t.AtendenteId == usuario.Id).ToList();
 
                 else 
                     ticketsAtendente = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status != Enum.Parse<Status>("FECHADO")).ToList();
@@ -187,10 +187,10 @@ namespace Core
             // busco pelos tickets daquele especifico usuario 
             List<Ticket> ticketsCliente;
 
-            if (StatusAtual.ToUpper()=="CONCLUIDO")
-                ticketsCliente = _serviceContext.Tickets.Where(c => (c.Status == Enum.Parse<Status>("ABERTO") ||  c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE")) && c.ClienteId == Guid.Parse(Usertoken) ).ToList();
+            if (StatusAtual.ToUpper()=="ANDAMENTO")
+                ticketsCliente = _serviceContext.Tickets.Where(c => (c.Status == Enum.Parse<Status>("ABERTO") ||  c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE")) && c.ClienteId == usuario.Id ).ToList();
             else
-                ticketsCliente = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("FECHADO") && c.ClienteId == Guid.Parse(Usertoken)).ToList();
+                ticketsCliente = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("FECHADO") && c.ClienteId == usuario.Id).ToList();
 
 
             // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
