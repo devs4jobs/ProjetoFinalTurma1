@@ -88,8 +88,7 @@ namespace Core
 
             _mapper.Map(ticketView, ticketSelecionado);
 
-            AtribuiLista(ticketSelecionado);
-
+       
             _serviceContext.SaveChanges();
 
             return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(ticketSelecionado) };
@@ -131,7 +130,7 @@ namespace Core
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == tId && t.ClienteId == cliente.Id || t.Id == tId && t.AtendenteId == cliente.Id);
 
-            AtribuiLista(TicketSolicitado);
+         
 
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(TicketSolicitado) } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
@@ -326,31 +325,6 @@ namespace Core
             catch (Exception) { return long.Parse(dataString + (1).ToString("D6")); }
         }
 
-       //Método para realizar a atribuicao na lista da lista de respostas no tciket
-      public void AtribuiLista(Ticket ticket)
-      {
-          var ListaResposta = _serviceContext.Respostas.Where(c => c.TicketId == ticket.Id).ToList();
-      
-          var oAtendente = _serviceContext.Usuarios.FirstOrDefault(c => c.Id == ticket.AtendenteId);
-          var oUsuario = _serviceContext.Usuarios.FirstOrDefault(c => c.Id == ticket.ClienteId);
-      
-          //if (oAtendente != null)
-          //    ticket.Atendente = new UsuarioRetorno { Nome = oAtendente.Nome, Email = oAtendente.Email };
-      
-          //if (oUsuario != null)
-          //    ticket.Cliente = new UsuarioRetorno { Nome = oUsuario.Nome, Email = oUsuario.Email };
-      
-          //foreach (var Resposta in ListaResposta)
-          //{
-          //    if (Resposta.UsuarioId == oAtendente.Id)
-          //        Resposta.Usuario = new UsuarioRetorno { Nome = oAtendente.Nome, Email = oAtendente.Email };
-      
-          //    if (Resposta.UsuarioId == oUsuario.Id)
-          //        Resposta.Usuario = new UsuarioRetorno { Nome = oUsuario.Nome, Email = oUsuario.Email };
-          //}
-      
-          ticket.LstRespostas = ListaResposta.OrderBy(c => c.DataCadastro).ToList();
-      
-      }
+    
     }
 }
