@@ -34,7 +34,7 @@ namespace ApiForum.Controllers
         }
 
         [HttpGet("{TicketID}")]
-      
+
         public IActionResult GetIdTicket([FromHeader]string autorToken, string TicketID)
         {
             var Core = new TicketCore(_contexto).BuscarTicketporID(autorToken, TicketID);
@@ -42,25 +42,17 @@ namespace ApiForum.Controllers
         }
 
         //Chamando o metodo de listar todos da core 
-        [HttpGet]
-        public IActionResult GetTodosTickets([FromHeader]string autorToken,[FromQuery] int numeroPagina,[FromQuery]int quantidadePagina)
+        [HttpGet("{StatusAtual}")]
+        public IActionResult GetTodosTickets([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina, string StatusAtual)
         {
-            var Core = new TicketCore(_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina);
-            return Core.Status ? Ok(Core) : Ok(Core);
-        }
-
-        //Chamando o metodo de listar todos da core 
-        [HttpGet("Tickets")]
-        public IActionResult GetTicketsDisponiveis([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina)
-        {
-            var Core = new TicketCore(_contexto).BuscarTicketSemAtendente(autorToken, numeroPagina, quantidadePagina);
+            var Core = new TicketCore(_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina, StatusAtual);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         [HttpPut("{TicketID}")]
-        public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID,[FromBody] Ticket ticket)
+        public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID, [FromBody] Ticket ticket)
         {
-            var Core = new TicketCore(_Mapper,_contexto).AtualizarTicket(autorToken, TicketID, ticket);
+            var Core = new TicketCore(_Mapper, _contexto).AtualizarTicket(autorToken, TicketID, ticket);
             return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);
         }
 
@@ -77,6 +69,7 @@ namespace ApiForum.Controllers
             var Core = new TicketCore(_contexto).AvaliarTicket(autorToken, TicketID, avaliacao);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
+
         [HttpPost("Fechar")]
         public IActionResult FecharTicket([FromHeader]string autorToken, string TicketID)
         {

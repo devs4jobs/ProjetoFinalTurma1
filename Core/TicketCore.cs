@@ -129,7 +129,7 @@ namespace Core
             
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketSolicitado } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
-        public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
+        public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro,string StatusAtual)
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken,_serviceContext))
@@ -146,14 +146,21 @@ namespace Core
             //Confiro o tipo do usuario e exibo os resultados paginados de acordo com o tipo do usuario
             if (usuario.Tipo.ToUpper() == "ATENDENTE")
             {
+                List<Ticket> ticketsAtendente;
                 // busco pelos tickets daquele especifico usuario 
+                if (StatusAtual == "ABERTO") 
+                    ticketsAtendente = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status != Enum.Parse<Status>("FECHADO")).ToList();
 
-                var ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
-                && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+                else if (StatusAtual == "ANDAMENTO")
+                    ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
+                    && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
+
+                else 
+                    ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("FECHADO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();             
+             
 
                 ticketsAtendente.ForEach(t => VerificaData(t));
                 _serviceContext.SaveChanges();
-
 
                 // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
                 if (NumeroPagina > 0 && QuantidadeRegistro > 0)
@@ -167,9 +174,16 @@ namespace Core
 
                 return new Retorno { Status = true, Paginacao = Paginacao, Resultado = ticketsAtendente.Take(10) };
             }
+
             // busco pelos tickets daquele especifico usuario 
 
-            var ticketsCliente = _serviceContext.Tickets.Where(c =>  c.Status == Enum.Parse<Status>("ABERTO") ||  c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE") && c.ClienteId == Guid.Parse(Usertoken) ).ToList();
+            List<Ticket> ticketsCliente;
+
+            if (StatusAtual.ToUpper()=="CONCLUIDO")
+                ticketsCliente = _serviceContext.Tickets.Where(c => (c.Status == Enum.Parse<Status>("ABERTO") ||  c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE")) && c.ClienteId == Guid.Parse(Usertoken) ).ToList();
+            else
+                ticketsCliente = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("FECHADO") && c.ClienteId == Guid.Parse(Usertoken)).ToList();
+
             ticketsCliente.ForEach(r => VerificaData(r));
             _serviceContext.SaveChanges();
 
@@ -207,30 +221,6 @@ namespace Core
 
             _serviceContext.SaveChanges();
             return new Retorno { Status = true, Resultado = new List<string> { $"{atendente.Nome} você atribuiu esse Ticket a sua base." } };
-        }
-
-        // Método para buscar os tickets disponiveis para o atendente
-        public Retorno BuscarTicketSemAtendente(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
-        {
-            //verifico login.
-            if (!Autorizacao.ValidarUsuario(Usertoken,_serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
-
-            var todosTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status  != Enum.Parse<Status>("FECHADO"));
-
-            // nova instancia da paganicação
-            var Paginacao = new Paginacao();
-
-            // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
-            if (NumeroPagina > 0 && QuantidadeRegistro > 0)
-            {
-                Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, todosTickets.Count());
-                return new Retorno { Status = true, Paginacao = Paginacao, Resultado = todosTickets.OrderBy(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
-            }
-
-            Paginacao.Paginar(1, 10, todosTickets.Count());
-
-            return new Retorno { Status = true, Paginacao = Paginacao, Resultado = todosTickets.Take(10) };
         }
 
         public Retorno AvaliarTicket(string tokenAutor, string ticketId, string avaliacao)
