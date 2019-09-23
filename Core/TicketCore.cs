@@ -39,7 +39,7 @@ namespace Core
                 .WithMessage("O título do ticket não pode ser nulo  minimo de caracteres é 5");
 
             RuleFor(t => t.Mensagem).NotNull().MinimumLength(10)
-                .WithMessage("A Mensagem do ticket não pode ser nula , deve haver uma descrição, e o minimo de caracteres é 5");
+                .WithMessage("A Mensagem do ticket não pode ser nula , deve haver uma descrição, e o minimo de caracteres é 10");
 
             RuleFor(t => t.Status).IsInEnum();
 
