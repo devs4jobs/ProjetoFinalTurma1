@@ -35,7 +35,7 @@ namespace ApiForum.Controllers
 
         public IActionResult GetIdTicket([FromHeader]string autorToken, string TicketID)
         {
-            var Core = new TicketCore(_contexto).BuscarTicketporID(autorToken, TicketID);
+            var Core = new TicketCore(_Mapper, _contexto).BuscarTicketporID(autorToken, TicketID);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
@@ -43,7 +43,7 @@ namespace ApiForum.Controllers
         [HttpGet]
         public IActionResult GetTodosTickets([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina)
         {
-            var Core = new TicketCore(_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina);
+            var Core = new TicketCore(_Mapper,_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
@@ -51,7 +51,7 @@ namespace ApiForum.Controllers
         [HttpGet("Tickets")]
         public IActionResult GetTicketsDisponiveis([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina)
         {
-            var Core = new TicketCore(_contexto).BuscarTicketSemAtendente(autorToken, numeroPagina, quantidadePagina);
+            var Core = new TicketCore(_Mapper, _contexto).BuscarTicketSemAtendente(autorToken, numeroPagina, quantidadePagina);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 

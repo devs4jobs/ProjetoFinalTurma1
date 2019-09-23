@@ -50,7 +50,7 @@ namespace Core
 
             _resposta.UsuarioId = Guid.Parse(tokenAutor);
 
-            if (Ticket.ClientId != _resposta.UsuarioId && Ticket.AtendentId != _resposta.UsuarioId)
+            if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
                 return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
 
             // defino o status da resposta baseando se na pessoa que esta enviando 

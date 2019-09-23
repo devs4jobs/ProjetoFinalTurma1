@@ -36,14 +36,16 @@ namespace ApiTicket
             {
                 cfg.CreateMap<UsuarioView, Usuario>();
 
+                cfg.CreateMap<Usuario, UsuarioRetorno>();
+
                 cfg.CreateMap<LoginView, Usuario>();
 
 
                 cfg.CreateMap<TicketUpadateView, Ticket>()
                     .ForMember(dest => dest.Id, opt => opt.Ignore())
                     .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
-                    .ForMember(dest => dest.ClientId, opt => opt.Ignore())
-                    .ForMember(dest => dest.AtendentId, opt => opt.Ignore())
+                    .ForMember(dest => dest.ClienteId, opt => opt.Ignore())
+                    .ForMember(dest => dest.AtendenteId, opt => opt.Ignore())
                     .ForMember(dest => dest.LstRespostas, opt => opt.Ignore())
                     .ForMember(dest => dest.NumeroTicket, opt => opt.Ignore())
                     .ForMember(dest => dest.Avaliacao, opt => opt.Condition(ori => ori.Avaliacao != null))
@@ -52,6 +54,12 @@ namespace ApiTicket
                     .ForMember(dest => dest.Mensagem , opt => opt.Condition(ori => ori.Mensagem != null));
 
                 cfg.CreateMap<TicketView, Ticket>();
+
+                cfg.CreateMap<Ticket, TicketRetorno>()
+                .ForMember(dest => dest.Atendente, opt => opt.Condition(ori => ori.Atendente != null))
+                .ForMember(dest => dest.Cliente, opt => opt.Condition(ori => ori.Cliente != null));
+
+                
 
 
                 cfg.CreateMap<RespostaView, Resposta>();
