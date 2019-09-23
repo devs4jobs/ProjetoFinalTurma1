@@ -9,7 +9,7 @@ namespace Model
         public string Mensagem { get; set; }
         public UsuarioRetorno Cliente { get; set; }
         public UsuarioRetorno Atendente { get; set; }
-        public List<Resposta> LstRespostas { get; set; }
+        public List<RespostaRetorno> LstRespostas { get; set; }
         public Avaliacao? Avaliacao { get; set; }
     }
 }
