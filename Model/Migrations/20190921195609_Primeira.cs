@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Model.Migrations
@@ -30,10 +29,9 @@ namespace Model.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     DataCadastro = table.Column<DateTime>(nullable: false),
-                    NumeroTicket = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    ClienteId = table.Column<Guid>(nullable: true),
-                    AtendenteId = table.Column<Guid>(nullable: true),
+                    NumeroTicket = table.Column<long>(nullable: false),
+                    ClientId = table.Column<Guid>(nullable: true),
+                    AtendentId = table.Column<Guid>(nullable: true),
                     Status = table.Column<int>(nullable: true),
                     Titulo = table.Column<string>(nullable: true),
                     Mensagem = table.Column<string>(nullable: true),
@@ -43,14 +41,14 @@ namespace Model.Migrations
                 {
                     table.PrimaryKey("PK_Tickets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tickets_Usuarios_AtendenteId",
-                        column: x => x.AtendenteId,
+                        name: "FK_Tickets_Usuarios_AtendentId",
+                        column: x => x.AtendentId,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Tickets_Usuarios_ClienteId",
-                        column: x => x.ClienteId,
+                        name: "FK_Tickets_Usuarios_ClientId",
+                        column: x => x.ClientId,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -89,19 +87,14 @@ namespace Model.Migrations
                 column: "TicketId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Respostas_UsuarioId",
-                table: "Respostas",
-                column: "UsuarioId");
+                name: "IX_Tickets_AtendentId",
+                table: "Tickets",
+                column: "AtendentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tickets_AtendenteId",
+                name: "IX_Tickets_ClientId",
                 table: "Tickets",
-                column: "AtendenteId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tickets_ClienteId",
-                table: "Tickets",
-                column: "ClienteId");
+                column: "ClientId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

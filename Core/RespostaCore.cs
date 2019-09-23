@@ -18,7 +18,7 @@ namespace Core
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
-        public RespostaCore(RespostaView respostaquevem, ServiceContext ServiceContext,IMapper mapper)
+        public RespostaCore(RespostaView respostaquevem, ServiceContext ServiceContext, IMapper mapper)
         {
             _mapper = mapper;
             _serviceContext = ServiceContext;
@@ -28,6 +28,10 @@ namespace Core
             RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
             RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
         }
+
+        //Método para o cadastro de respostas
+
+
         public Retorno CadastrarResposta(string tokenAutor)
         {
             // o teste para a validacao do usuario
@@ -46,7 +50,7 @@ namespace Core
 
             _resposta.UsuarioId = Guid.Parse(tokenAutor);
 
-            if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
+            if (Ticket.ClientId != _resposta.UsuarioId && Ticket.AtendentId != _resposta.UsuarioId)
                 return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
 
             // defino o status da resposta baseando se na pessoa que esta enviando 
@@ -90,7 +94,7 @@ namespace Core
 
             if (umaResposta == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
-
+            
             if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para editar negada, só o autor da resposta pode edita-la" } };
 

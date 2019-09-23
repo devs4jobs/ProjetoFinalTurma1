@@ -22,7 +22,7 @@ namespace ApiForum.Controllers
             var Core = new RespostaCore(resposta, _contexto,_mapper).CadastrarResposta(autorToken);
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core): (IActionResult)Ok(Core);
         }
-
+    
         [HttpGet("{RespostaID}")]
         public IActionResult GetIdResposta([FromHeader]string autorToken, string RespostaID)
         {

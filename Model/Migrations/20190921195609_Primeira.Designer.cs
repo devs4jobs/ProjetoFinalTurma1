@@ -10,7 +10,7 @@ using Model;
 namespace Model.Migrations
 {
     [DbContext(typeof(ServiceContext))]
-    [Migration("20190921182835_Primeira")]
+    [Migration("20190921195609_Primeira")]
     partial class Primeira
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,8 +38,6 @@ namespace Model.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.HasIndex("UsuarioId");
-
                     b.ToTable("Respostas");
                 });
 
@@ -48,19 +46,17 @@ namespace Model.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid?>("AtendenteId");
+                    b.Property<Guid?>("AtendentId");
 
                     b.Property<int?>("Avaliacao");
 
-                    b.Property<Guid?>("ClienteId");
+                    b.Property<Guid?>("ClientId");
 
                     b.Property<DateTime>("DataCadastro");
 
                     b.Property<string>("Mensagem");
 
-                    b.Property<long>("NumeroTicket")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<long>("NumeroTicket");
 
                     b.Property<int?>("Status");
 
@@ -68,9 +64,9 @@ namespace Model.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AtendenteId");
+                    b.HasIndex("AtendentId");
 
-                    b.HasIndex("ClienteId");
+                    b.HasIndex("ClientId");
 
                     b.ToTable("Tickets");
                 });
@@ -100,21 +96,17 @@ namespace Model.Migrations
                     b.HasOne("Model.Ticket")
                         .WithMany("LstRespostas")
                         .HasForeignKey("TicketId");
-
-                    b.HasOne("Model.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId");
                 });
 
             modelBuilder.Entity("Model.Ticket", b =>
                 {
-                    b.HasOne("Model.Usuario", "Atendente")
+                    b.HasOne("Model.Usuario", "Atendent")
                         .WithMany()
-                        .HasForeignKey("AtendenteId");
+                        .HasForeignKey("AtendentId");
 
-                    b.HasOne("Model.Usuario", "Cliente")
+                    b.HasOne("Model.Usuario", "Client")
                         .WithMany()
-                        .HasForeignKey("ClienteId");
+                        .HasForeignKey("ClientId");
                 });
 #pragma warning restore 612, 618
         }

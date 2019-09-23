@@ -10,7 +10,7 @@ namespace Model
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; private set; } = Guid.NewGuid();
-        [JsonIgnore]
+        //[JsonIgnore]
         public DateTime DataCadastro { get; set; } = DateTime.Now;
     }
 }
