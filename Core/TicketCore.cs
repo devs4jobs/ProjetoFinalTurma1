@@ -139,11 +139,12 @@ namespace Core
 
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(TicketSolicitado) } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
+
         public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro,string StatusAtual)
         {
             //verifico login.
-            if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+            //if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
+              //  return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             //busco pelo usuario e vejo se ele existe.
             var usuario = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
@@ -152,38 +153,31 @@ namespace Core
 
             // nova instancia da paganicação
             var Paginacao = new Paginacao();
-
+            List<Ticket> ListaDeTickets=new List<Ticket>();
             //Confiro o tipo do usuario e exibo os resultados paginados de acordo com o tipo do usuario
-            if (usuario.Tipo.ToUpper() == "ATENDENTE")
+            if (usuario.Tipo == "ATENDENTE")
             {
-                List<Ticket> ticketsAtendente;
                 // busco pelos tickets daquele especifico usuario 
-                if (StatusAtual == "ABERTO") 
-                    ticketsAtendente = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status != Enum.Parse<Status>("FECHADO")).ToList();
-
+                if (StatusAtual == "ABERTO")
+                     ListaDeTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status != Enum.Parse<Status>("FECHADO")).ToList();
 
                 else if (StatusAtual == "ANDAMENTO")
-                    ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
+                    ListaDeTickets = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
                     && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
-
-                else 
-                    ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("FECHADO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();             
-             
-
-    
-                _serviceContext.SaveChanges();
+                else
+                     ListaDeTickets = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("FECHADO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();             
 
 
                 // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
                 if (NumeroPagina > 0 && QuantidadeRegistro > 0)
                 {
-                    Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsAtendente.Count());
-                    var listaPaginada = ticketsAtendente.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
-                    return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado =_mapper.Map<List<TicketRetorno>>(ticketsAtendente) };
+                    Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ListaDeTickets.Count());
+                    var listaPaginada = ListaDeTickets.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
+                    return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado =_mapper.Map<List<TicketRetorno>>(ListaDeTickets) };
                 }
 
-                Paginacao.Paginar(1, 10, ticketsAtendente.Count());
-                var retorno1 = _mapper.Map<List<TicketRetorno>>(ticketsAtendente.Take(10));
+                Paginacao.Paginar(1, 10, ListaDeTickets.Count());
+                var retorno1 = _mapper.Map<List<TicketRetorno>>(ListaDeTickets.Take(10));
 
                 return retorno1.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "VocÊ nao tem tickets no momento!" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno1 };
             }
@@ -191,26 +185,21 @@ namespace Core
             // busco pelos tickets daquele especifico usuario 
 
 
-            List<Ticket> ticketsCliente;
-
             if (StatusAtual.ToUpper()=="CONCLUIDO")
-                ticketsCliente = _serviceContext.Tickets.Where(c => (c.Status == Enum.Parse<Status>("ABERTO") ||  c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE")) && c.ClienteId == Guid.Parse(Usertoken) ).ToList();
+                ListaDeTickets = _serviceContext.Tickets.Where(c => (c.Status == Enum.Parse<Status>("ABERTO") ||  c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE")) && c.ClienteId == Guid.Parse(Usertoken) ).ToList();
             else
-                ticketsCliente = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("FECHADO") && c.ClienteId == Guid.Parse(Usertoken)).ToList();
-
-      
-            _serviceContext.SaveChanges();
+                ListaDeTickets = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("FECHADO") && c.ClienteId == Guid.Parse(Usertoken)).ToList();
 
 
             // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
             if (NumeroPagina > 0 && QuantidadeRegistro > 0)
             {
-                Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsCliente.Count());
-                var listaPaginada = ticketsCliente.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
-                return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsCliente) };
+                Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ListaDeTickets.Count());
+                var listaPaginada = ListaDeTickets.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
+                return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ListaDeTickets) };
             }
-            Paginacao.Paginar(1, 10, ticketsCliente.Count());
-            var retorno2 = _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10));
+            Paginacao.Paginar(1, 10, ListaDeTickets.Count());
+            var retorno2 = _mapper.Map<List<TicketRetorno>>(ListaDeTickets.Take(10));
             
 
             return new Retorno { Status = true, Paginacao = Paginacao, Resultado =  retorno2};
