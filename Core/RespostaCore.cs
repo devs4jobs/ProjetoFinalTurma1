@@ -31,7 +31,6 @@ namespace Core
 
         //Método para o cadastro de respostas
 
-
         public Retorno CadastrarResposta(string tokenAutor)
         {
             // o teste para a validacao do usuario
@@ -61,7 +60,7 @@ namespace Core
             _serviceContext.Add(_resposta);
             _serviceContext.SaveChanges();
 
-            return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(_resposta) };
+            return new Retorno { Status = true, Resultado = new List<string> {"Reposta enviada com sucesso!" } };
         }
 
         //Método para buscar todas as respostas daquele ticket em especificio 
@@ -100,7 +99,6 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para editar negada, só o autor da resposta pode edita-la" } };
 
             _mapper.Map(respostaQueVem, umaResposta);
-
 
             if (umaResposta.Mensagem.Length < 10)
                 return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
