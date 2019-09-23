@@ -17,7 +17,21 @@ namespace ApiForum.Controllers
         // construtor para a utilização do automapper por meio de injeçao de dependecia
         public UsuariosController(ServiceContext service, IMapper mapper) { _contexto = service; _mapper = mapper; }
 
-        // Cadastrar um usuarioto
+        /// <summary>
+        /// Criar Usuário.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Todo
+        ///     {
+        ///        "id": 1,
+        ///        "name": "Item1",
+        ///        "isComplete": true
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="usuarioView"></param>
         [HttpPost]
         public IActionResult Cadastro([FromBody] UsuarioView usuarioView  )
         {

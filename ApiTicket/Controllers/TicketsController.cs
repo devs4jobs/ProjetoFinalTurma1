@@ -24,34 +24,26 @@ namespace ApiForum.Controllers
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
         }
 
-        [HttpPost("PegarTicket/{TicketID}")]
-        public IActionResult TomarPosseDoTicket(string TicketID, [FromHeader] string autorToken)
+        [HttpPost("PegarTicket/{numeroTicket}")]
+        public IActionResult TomarPosseDoTicket(string numeroTicket, [FromHeader] string autorToken)
         {
-            var Core = new TicketCore(_contexto).TomarPosseTicket(autorToken, TicketID);
+            var Core = new TicketCore(_contexto).TomarPosseTicket(autorToken, numeroTicket);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         [HttpGet("{TicketID}")]
 
-        public IActionResult GetIdTicket([FromHeader]string autorToken, string TicketID)
+        public IActionResult ProcurarTicketPorId([FromHeader]string autorToken, string TicketID)
         {
             var Core = new TicketCore(_Mapper, _contexto).BuscarTicketporID(autorToken, TicketID);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
         //Chamando o metodo de listar todos da core 
-        [HttpGet]
-        public IActionResult GetTodosTickets([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina)
+        [HttpGet("Todos/{StatusAtual}")]
+        public IActionResult BuscarTodosTickets([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina, string StatusAtual)
         {
-            var Core = new TicketCore(_Mapper,_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina);
-            return Core.Status ? Ok(Core) : Ok(Core);
-        }
-
-        //Chamando o metodo de listar todos da core 
-        [HttpGet("Tickets")]
-        public IActionResult GetTicketsDisponiveis([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina)
-        {
-            var Core = new TicketCore(_Mapper, _contexto).BuscarTicketSemAtendente(autorToken, numeroPagina, quantidadePagina);
+            var Core = new TicketCore(_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina, StatusAtual);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
@@ -69,17 +61,26 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
-        [HttpPost("Avaliar")]
+        [HttpPost("Avaliar/{TicketID}/{avaliacao}")]
         public IActionResult AvaliarTicket([FromHeader]string autorToken, string TicketID, string avaliacao)
         {
             var Core = new TicketCore(_contexto).AvaliarTicket(autorToken, TicketID, avaliacao);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
+
         [HttpPost("Fechar")]
         public IActionResult FecharTicket([FromHeader]string autorToken, string TicketID)
         {
             var Core = new TicketCore(_contexto).FecharTicket(autorToken, TicketID);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
+
+        [HttpPost("TrocarAtendente/{numeroTicket}")]
+        public IActionResult TrocarAtendente( string numeroTicket, [FromHeader]string autorToken)
+        {
+            var Core = new TicketCore(_contexto).TrocarAtendente(numeroTicket, autorToken);
+            return Core.Status ? Ok(Core) : Ok(Core);
+        }
+
     }
 }

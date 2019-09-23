@@ -8,8 +8,7 @@ namespace Model
         public string Mensagem { get; set; }
         [ForeignKey("Tickets")]
         public Guid? TicketId { get; set; }
-        [NotMapped]
-        public UsuarioRetorno Usuario { get; set; }
+        public Usuario Usuario { get; set; }
         [ForeignKey("Usuarios")]
         public Guid? UsuarioId { get; set; }
     }
