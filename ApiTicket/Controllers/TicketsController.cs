@@ -43,7 +43,7 @@ namespace ApiForum.Controllers
         [HttpGet("Todos/{StatusAtual}")]
         public IActionResult BuscarTodosTickets([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina, string StatusAtual)
         {
-            var Core = new TicketCore(_Mapper,_contexto).BuscarTodosTickets(autorToken, 0, 0, StatusAtual);
+            var Core = new TicketCore(_Mapper,_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina, StatusAtual);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
