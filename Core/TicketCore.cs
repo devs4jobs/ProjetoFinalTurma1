@@ -306,7 +306,8 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
             // vejo se a avaliacao é valida
-            if (!Enum.TryParse(avaliacao, out Avaliacao result))
+            int.TryParse(avaliacao, out int avaliacao1);
+            if (!Enum.IsDefined(typeof(Avaliacao), avaliacao1) || avaliacao1 == 0)
                 return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
 
             // busco pelo ticket e faço a validação de o ticket precisar estar fechado
@@ -317,8 +318,8 @@ namespace Core
 
             if (Oticket.Status != Status.FECHADO)
                 return new Retorno { Status = false, Resultado = new List<string> { "O ticket precisa estar fechado para ocorrer a avaliação" } };
-
-            Oticket.Avaliacao = result;
+            
+            Oticket.Avaliacao = Enum.Parse<Avaliacao>(avaliacao);
 
             _serviceContext.SaveChanges();
 
