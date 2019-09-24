@@ -2,6 +2,8 @@
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using System.Threading.Tasks;
+
 namespace ApiForum.Controllers
 {
     [Produces("application/json")]
@@ -34,10 +36,12 @@ namespace ApiForum.Controllers
         /// <param name="usuarioView"></param>
         ///  /// <returns>Retorna o Status de cadastro</returns>
         [HttpPost]
-        public IActionResult Cadastro([FromBody] UsuarioView usuarioView)
+        public async Task<IActionResult> Cadastro([FromBody] UsuarioView usuarioView)
         {
-            var Core = new UsuarioCore(usuarioView, _contexto, _mapper).CadastrarUsuario();
-            return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", Core) : (IActionResult)Ok(Core);
+            var Core = new UsuarioCore(usuarioView, _contexto, _mapper);
+            var result = await Core.CadastrarUsuario();
+
+            return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", result) : (IActionResult)Ok(result);
         }
 
         /// <summary>
@@ -55,10 +59,12 @@ namespace ApiForum.Controllers
         /// <param name="loginView"></param>
         /// <returns>Retorna o AutorToken </returns>
         [HttpPost("Autenticar")]
-        public IActionResult Logar([FromBody] LoginView loginView)
+        public async Task<IActionResult> Logar([FromBody] LoginView loginView)
         {
-            var Core = new UsuarioCore(_contexto).LogarUsuario(loginView);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new UsuarioCore(_contexto);
+            var result = await Core.LogarUsuario(loginView);
+
+            return result.Status ? Ok(result) : Ok(result);
         }
     }
 }

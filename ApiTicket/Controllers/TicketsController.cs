@@ -16,7 +16,6 @@ namespace ApiForum.Controllers
         // construtor para a utilização do automapper por meio de injeçao de dependecia
         public TicketsController(ServiceContext contexto, IMapper mapper) { _contexto = contexto; _Mapper = mapper; }
 
-
         /// <summary>
         /// Criar Ticket
         /// </summary>
