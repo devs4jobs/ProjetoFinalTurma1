@@ -43,7 +43,7 @@ namespace Core
             if (_dbcontext.Usuarios.Any(e => e.Email == _usuario.Email))
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
 
-            _dbcontext.Usuarios.Add(_usuario);
+           await _dbcontext.Usuarios.AddAsync(_usuario);
 
            await _dbcontext.SaveChangesAsync();
 
@@ -54,7 +54,7 @@ namespace Core
         public async Task<Retorno> LogarUsuario(LoginView loginView)
         {
             //Vejo se o login esta correto, se nao ja retorno uma mensagem.
-            var usuarioLogin = await _dbcontext.Usuarios.SingleAsync(u => u.Email == loginView.Email && u.Senha == loginView.Senha);
+            var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email && u.Senha == loginView.Senha);
 
             if (usuarioLogin == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };

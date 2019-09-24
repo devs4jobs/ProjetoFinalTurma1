@@ -34,8 +34,9 @@ namespace ApiForum.Controllers
         [HttpPost]
         public IActionResult CadastrarTicket([FromBody] TicketView ticket, [FromHeader] string autorToken)
         {
-            var Core = new TicketCore(ticket, _contexto, _Mapper).CadastrarTicket(autorToken);
-            return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core) : (IActionResult)Ok(Core);
+            var Core = new TicketCore(ticket, _contexto, _Mapper);
+            var result = Core.CadastrarTicket(autorToken).Result;
+            return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
         }
 
         /// <summary>
@@ -46,8 +47,9 @@ namespace ApiForum.Controllers
         [HttpPost("PegarTicket/{numeroTicket}")]
         public IActionResult TomarPosseDoTicket(string numeroTicket, [FromHeader] string autorToken)
         {
-            var Core = new TicketCore(_contexto).TomarPosseTicket(autorToken, numeroTicket);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new TicketCore(_contexto);
+            var result = Core.TomarPosseTicket(autorToken, numeroTicket).Result;
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -59,8 +61,9 @@ namespace ApiForum.Controllers
         [HttpGet("{NumeroTicket}")]
         public IActionResult ProcurarTicketPorId([FromHeader]string autorToken, string NumeroTicket)
         {
-            var Core = new TicketCore(_Mapper, _contexto).BuscarTicketporNumeroDoTicket(autorToken, NumeroTicket);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new TicketCore(_Mapper, _contexto);
+            var result = Core.BuscarTicketporNumeroDoTicket(autorToken, NumeroTicket).Result;
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -74,8 +77,9 @@ namespace ApiForum.Controllers
         [HttpGet("Todos/{StatusAtual}")]
         public IActionResult BuscarTodosTickets([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina, string StatusAtual)
         {
-            var Core = new TicketCore(_Mapper,_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina, StatusAtual);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new TicketCore(_Mapper, _contexto);
+            var result = Core.BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina, StatusAtual).Result;
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -96,8 +100,9 @@ namespace ApiForum.Controllers
         [HttpPut("{TicketID}")]
         public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID, [FromBody] TicketView ticket)
         {
-            var Core = new TicketCore(_Mapper, _contexto).AtualizarTicket(autorToken, TicketID, ticket);
-            return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);
+            var Core = new TicketCore(_Mapper, _contexto);
+            var result = Core.AtualizarTicket(autorToken, TicketID, ticket).Result;
+            return result.Status ? Accepted(result) : (IActionResult)Ok(result);
         }
 
         /// <summary>
@@ -109,8 +114,9 @@ namespace ApiForum.Controllers
         [HttpDelete("{TicketID}")]
         public IActionResult DeletarTicketId([FromHeader]string autorToken, string TicketID)
         {
-            var Core = new TicketCore(_contexto).DeletarTicket(autorToken, TicketID);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new TicketCore(_contexto);
+            var result = Core.DeletarTicket(autorToken, TicketID).Result;
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -123,8 +129,9 @@ namespace ApiForum.Controllers
         [HttpPost("Avaliar/{TicketID}/{avaliacao}")]
         public IActionResult AvaliarTicket([FromHeader]string autorToken, string TicketID, string avaliacao)
         {
-            var Core = new TicketCore(_contexto).AvaliarTicket(autorToken, TicketID, avaliacao);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new TicketCore(_contexto);
+            var result = Core.AvaliarTicket(autorToken, TicketID, avaliacao).Result;
+            return result.Status ? Ok(Core) : Ok(Core);
         }
 
         /// <summary>
@@ -136,8 +143,9 @@ namespace ApiForum.Controllers
         [HttpPost("Fechar")]
         public IActionResult FecharTicket(string autorToken, string TicketID)
         {
-            var Core = new TicketCore(_contexto).FecharTicket(autorToken, TicketID);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new TicketCore(_contexto);
+            var result = Core.FecharTicket(autorToken, TicketID).Result;
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -147,10 +155,11 @@ namespace ApiForum.Controllers
         /// <param name="autorToken"></param>
         /// <returns>Retorno o Status da troca se foi ou não bem sucedida.</returns>
         [HttpPost("TrocarAtendente/{numeroTicket}")]
-        public IActionResult TrocarAtendente( string numeroTicket, [FromHeader]string autorToken)
+        public IActionResult TrocarAtendente(string numeroTicket, [FromHeader]string autorToken)
         {
-            var Core = new TicketCore(_contexto).TrocarAtendente(numeroTicket, autorToken);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new TicketCore(_contexto);
+            var result = Core.TrocarAtendente(numeroTicket, autorToken).Result;
+            return result.Status ? Ok(result) : Ok(result);
         }
 
     }

@@ -34,10 +34,11 @@ namespace ApiForum.Controllers
         [HttpPost]
         public IActionResult CadastrarResposta([FromBody] RespostaView resposta, [FromHeader] string autorToken)
         {
-            var Core = new RespostaCore(resposta, _contexto,_mapper).CadastrarResposta(autorToken);
-            return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core): (IActionResult)Ok(Core);
+            var Core = new RespostaCore(resposta, _contexto, _mapper);
+            var result = Core.CadastrarResposta(autorToken).Result;
+            return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
         }
-    
+
         /// <summary>
         ///  Busco a Resposta do Id Inserido.
         /// </summary>
@@ -47,8 +48,9 @@ namespace ApiForum.Controllers
         [HttpGet("{RespostaID}")]
         public IActionResult GetIdResposta([FromHeader]string autorToken, string RespostaID)
         {
-            var Core = new RespostaCore(_contexto,_mapper).BuscarRespostas(autorToken, RespostaID);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new RespostaCore(_contexto, _mapper);
+            var result = Core.BuscarRespostas(autorToken, RespostaID).Result;
+            return result.Status ? Ok(result) : Ok(result);
         }
         /// <summary>
         /// Atualizar a Resposta do Id inserido.
@@ -68,8 +70,9 @@ namespace ApiForum.Controllers
         [HttpPut("{RespostaID}")]
         public IActionResult AtualizarRespostaId([FromHeader]string autorToken, string RespostaID, RespostaUpdateView resposta)
         {
-            var Core = new RespostaCore(_contexto,_mapper).EditarResposta(autorToken, RespostaID, resposta);
-            return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);
+            var Core = new RespostaCore(_contexto, _mapper);
+            var result = Core.EditarResposta(autorToken, RespostaID, resposta).Result;
+            return result.Status ? Accepted(result) : (IActionResult)Ok(result);
         }
         /// <summary>
         /// Deletar a Resposta do Id Inserido.
@@ -80,8 +83,9 @@ namespace ApiForum.Controllers
         [HttpDelete("{RespostaID}")]
         public IActionResult DeletarRespostaId([FromHeader]string autorToken, string RespostaID)
         {
-            var Core = new RespostaCore(_contexto).DeletarResposta(autorToken, RespostaID);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new RespostaCore(_contexto);
+            var result = Core.DeletarResposta(autorToken, RespostaID).Result;
+            return result.Status ? Ok(result) : Ok(result);
         }
     }
 }
