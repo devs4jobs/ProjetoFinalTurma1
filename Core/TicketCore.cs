@@ -32,7 +32,7 @@ namespace Core
         public TicketCore(TicketView ticket, ServiceContext serviceContext, IMapper mapper)
         {
             _mapper = mapper;
-            _ticket = _mapper.Map<TicketView,Ticket>(ticket);
+            _ticket = _mapper.Map<TicketView, Ticket>(ticket);
             _serviceContext = serviceContext;
 
             RuleFor(t => t.Titulo).NotNull().MinimumLength(5)
@@ -84,12 +84,15 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
             var ticketSelecionado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == tId);
+          
+
+            if (ticketSelecionado.LstRespostas ==  null || ticketSelecionado.LstRespostas.Count() == 0)
+                return new Retorno { Status = false, Resultado = new List<string> { "Como o ticket já contem respostas. não é mais possivel atualiza-lo" } };
 
             //vejo se o cliente que ta longado é o mesmo que está Atualizando o ticket.
             if (ticketSelecionado.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é o mesmo que postou o ticket!" } };
 
             _mapper.Map(ticketView, ticketSelecionado);
-
             _serviceContext.SaveChanges();
 
             return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(ticketSelecionado) };
@@ -104,47 +107,51 @@ namespace Core
             if (!Guid.TryParse(TicketID, out Guid tId))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
-            _ticket = _serviceContext.Tickets.Include(c =>c.LstRespostas).FirstOrDefault(t => t.Id == tId);
+            _ticket = _serviceContext.Tickets.Include(c => c.LstRespostas).FirstOrDefault(t => t.Id == tId);
 
 
             //vejo se o cliente que ta logado é o mesmo que está públicou o ticket.
             if (Guid.Parse(Usertoken) != _ticket.ClienteId) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não pode deletar esse ticket, pois não é quem postou o mesmo!" } };
 
             //tento excluir o ticket e salvar as  alterações.
-            
-            if(_ticket.LstRespostas.Count() >0)
+
+            if (_ticket.LstRespostas.Count() > 0)
                 return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel remover este ticket, pois ele ja tem respostas!" } };
 
             _serviceContext.Tickets.Remove(_ticket);
-                _serviceContext.SaveChanges();
-           
-      
+            _serviceContext.SaveChanges();
+
+
             return new Retorno { Status = true, Resultado = new List<string> { " seu Ticket foi Deletado com Sucesso!" } };
         }
-        public Retorno BuscarTicketporID(string Usertoken, string TicketID)
+        public Retorno BuscarTicketporNumeroDoTicket(string Usertoken, string NumeroTicketQueVem)
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-            //verifico se o Ticket ID é valido.
-            if (!Guid.TryParse(TicketID, out Guid tId))
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
-
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
             if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
-            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
-            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == tId && t.ClienteId == cliente.Id || t.Id == tId && t.AtendenteId == cliente.Id);
+            if(!long.TryParse(NumeroTicketQueVem, out long numeroticket))
+                return new Retorno { Status = false, Resultado = new List<string> { "Número do ticket incorreto!" } };
 
-            return TicketSolicitado != null ? new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(TicketSolicitado) } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
+            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
+            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.NumeroTicket == numeroticket && t.ClienteId == cliente.Id || t.NumeroTicket == numeroticket && t.AtendenteId == cliente.Id);
+
+            TicketSolicitado.LstRespostas = _serviceContext.Respostas.Include(r => r.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).OrderBy(c => c.DataCadastro).ToList();
+
+            var TicketRetorno = _mapper.Map<TicketRetorno>(TicketSolicitado);
+            if (TicketRetorno.LstRespostas.Count == 0) TicketRetorno.LstRespostas = null;
+
+            return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketRetorno } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
 
-        public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro,string StatusAtual)
+        public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro, string StatusAtual)
         {
             //verifico login.
-            //if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-              //  return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+            if (!Guid.TryParse(Usertoken, out Guid token))
+                return new Retorno { Status = false, Resultado = new List<string> { "Token inválido" } };
 
             //busco pelo usuario e vejo se ele existe.
             var usuario = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
@@ -153,56 +160,61 @@ namespace Core
 
             // nova instancia da paganicação
             var Paginacao = new Paginacao();
-            List<Ticket> ListaDeTickets=new List<Ticket>();
+
             //Confiro o tipo do usuario e exibo os resultados paginados de acordo com o tipo do usuario
-            if (usuario.Tipo == "ATENDENTE")
+            if (usuario.Tipo.ToUpper() == "ATENDENTE")
             {
+                List<Ticket> ticketsAtendente;
+
                 // busco pelos tickets daquele especifico usuario 
-                if (StatusAtual == "ABERTO")
-                     ListaDeTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status != Enum.Parse<Status>("FECHADO")).ToList();
+                switch (StatusAtual.ToUpper())
+                {
 
-                else if (StatusAtual == "ANDAMENTO")
-                    ListaDeTickets = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
-                    && t.AtendenteId == Guid.Parse(Usertoken)).ToList();
-                else
-                     ListaDeTickets = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("FECHADO") && t.AtendenteId == Guid.Parse(Usertoken)).ToList();             
+                    case "FECHADO":
+                        ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Status.FECHADO && t.AtendenteId == usuario.Id).ToList();
+                        break;
 
+                    case "ANDAMENTO":
+                        ticketsAtendente = _serviceContext.Tickets.Where(t => (t.Status == Status.EM_ANDAMENTO || t.Status == Status.AGUARDANDO_RESPOSTA_DO_CLIENTE)
+                  && t.AtendenteId == usuario.Id).ToList();
+                        break;
+
+                    default:
+                        ticketsAtendente = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status == Status.ABERTO).ToList();
+                        break;
+                }
 
                 // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10, e ordeno pelo mais antigo
                 if (NumeroPagina > 0 && QuantidadeRegistro > 0)
                 {
-                    Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ListaDeTickets.Count());
-                    var listaPaginada = ListaDeTickets.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
-                    return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado =_mapper.Map<List<TicketRetorno>>(ListaDeTickets) };
+                    Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsAtendente.Count());
+                    var listaPaginada = ticketsAtendente.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
+                    return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsAtendente) };
                 }
 
-                Paginacao.Paginar(1, 10, ListaDeTickets.Count());
-                var retorno1 = _mapper.Map<List<TicketRetorno>>(ListaDeTickets.Take(10));
+                Paginacao.Paginar(1, 10, ticketsAtendente.Count());
+                var retorno1 = _mapper.Map<List<TicketRetorno>>(ticketsAtendente.Take(10));
 
-                return retorno1.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "VocÊ nao tem tickets no momento!" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno1 };
+                return retorno1.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { $"VocÊ nao tem tickets {StatusAtual} momento!" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno1 };
             }
 
             // busco pelos tickets daquele especifico usuario 
+            List<Ticket> ticketsCliente;
 
+              ticketsCliente = StatusAtual.ToUpper() == "FECHADO" ?   _serviceContext.Tickets.Where(c => c.Status == Status.FECHADO && c.ClienteId == usuario.Id).ToList() : 
+               _serviceContext.Tickets.Where(c => c.Status != Status.FECHADO && c.ClienteId == usuario.Id).ToList();
 
-            if (StatusAtual.ToUpper()=="CONCLUIDO")
-                ListaDeTickets = _serviceContext.Tickets.Where(c => (c.Status == Enum.Parse<Status>("ABERTO") ||  c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE")) && c.ClienteId == Guid.Parse(Usertoken) ).ToList();
-            else
-                ListaDeTickets = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("FECHADO") && c.ClienteId == Guid.Parse(Usertoken)).ToList();
-
-
-            // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
+            // caso for posivel realizar a paginação se nao for exibo a quantidade padrão = 10
             if (NumeroPagina > 0 && QuantidadeRegistro > 0)
             {
-                Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ListaDeTickets.Count());
-                var listaPaginada = ListaDeTickets.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
-                return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ListaDeTickets) };
+                Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, ticketsCliente.Count());
+                var listaPaginada = ticketsCliente.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
+                return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsCliente) };
             }
-            Paginacao.Paginar(1, 10, ListaDeTickets.Count());
-            var retorno2 = _mapper.Map<List<TicketRetorno>>(ListaDeTickets.Take(10));
-            
+            Paginacao.Paginar(1, 10, ticketsCliente.Count());
+            var retorno2 = _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10));
 
-            return new Retorno { Status = true, Paginacao = Paginacao, Resultado =  retorno2};
+            return  retorno2.Count() == 0 ? new Retorno { Status = false,  Resultado = new List<string> { $"VocÊ nao tem tickets {StatusAtual} momento!" } }: new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno2 };
         }
         public Retorno TomarPosseTicket(string Usertoken, string numeroTicket)
         {
@@ -225,6 +237,7 @@ namespace Core
 
             //passo o valor para o ticket
             TicketSolicitado.AtendenteId = atendente.Id;
+            TicketSolicitado.Status = Status.EM_ANDAMENTO;
 
             _serviceContext.SaveChanges();
             return new Retorno { Status = true, Resultado = new List<string> { $"{atendente.Nome} você atribuiu esse Ticket a sua base." } };
@@ -237,12 +250,12 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             //verifico se o Ticket ID é valido.
-            if (!Guid.TryParse(ticketId, out Guid tId)) 
+            if (!Guid.TryParse(ticketId, out Guid tId))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
             // vejo se a avaliacao é valida
             if (!Enum.TryParse(avaliacao, out Avaliacao result))
-                return new Retorno { Status = false, Resultado = new List<string> { "Avaliação nao válida!" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
 
             // busco pelo ticket e faço a validação de o ticket precisar estar fechado
             var Oticket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == Guid.Parse(ticketId) && c.ClienteId == Guid.Parse(tokenAutor));
@@ -269,28 +282,33 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
             // busco e valido se este ticket em especifico é valido.
-            var oTicket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == result && c.AtendenteId == Guid.Parse(tokenAutor));
+            var oTicket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == result && c.ClienteId == Guid.Parse(tokenAutor));
 
             if (oTicket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
+            if (oTicket.AtendenteId == Guid.Parse(tokenAutor))
+                return new Retorno { Status = false, Resultado = new List<string> { "Somente clientes podem fechar seus tickets!" } };
+
             // atribuo e fecho o ticket
             oTicket.Status = Enum.Parse<Status>("FECHADO");
+
+            _serviceContext.SaveChanges();
 
             return new Retorno { Status = true, Resultado = new List<string> { "Ticket fechado com sucesso!" } };
         }
 
-        public Retorno TrocarAtendente(string Numero,string tokenAutor)
+        public Retorno TrocarAtendente(string Numero, string tokenAutor)
         {
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-            if (!long.TryParse(Numero, out long Result)||_serviceContext.Tickets.Any(c=>c.NumeroTicket==Result))
+            if (!long.TryParse(Numero, out long Result) || _serviceContext.Tickets.Any(c => c.NumeroTicket == Result))
                 return new Retorno { Status = false, Resultado = new List<string> { "Numero não existe na base de dados" } };
 
-            var UltimaResposta =_serviceContext.Respostas.Include(c=>c.Usuario).Where(c=>c.TicketId==_serviceContext.Tickets.FirstOrDefault(d => d.NumeroTicket == Result).Id).OrderBy(c=>c.DataCadastro).Last();
+            var UltimaResposta = _serviceContext.Respostas.Include(c => c.Usuario).Where(c => c.TicketId == _serviceContext.Tickets.FirstOrDefault(d => d.NumeroTicket == Result).Id).OrderBy(c => c.DataCadastro).Last();
 
-            if (UltimaResposta.Usuario.Tipo == "ATENDENTE"||(UltimaResposta.Usuario.Tipo=="CLIENTE"&&UltimaResposta.DataCadastro.AddDays(14)<DateTime.Now))
+            if (UltimaResposta.Usuario.Tipo == "ATENDENTE" || (UltimaResposta.Usuario.Tipo == "CLIENTE" && UltimaResposta.DataCadastro.AddDays(14) < DateTime.Now))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ultima Mensagem é do atendente ou Ultima Mensagem do cliente foi em menos de 14 dias" } };
 
             var Ticket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == UltimaResposta.TicketId);
@@ -305,13 +323,14 @@ namespace Core
         //metodo para fazer uma identificação unica de cada usuário.
         public long ConvertNumeroTickets()
         {
-            var dataString = DateTime.Now.ToString("yyyyMM"); 
-            try { 
+            var dataString = DateTime.Now.ToString("yyyyMM");
+            try
+            {
 
-            var number = _serviceContext.Tickets.OrderBy(c=>c.NumeroTicket).Last().NumeroTicket + 1;
+                var number = _serviceContext.Tickets.OrderBy(c => c.NumeroTicket).Last().NumeroTicket + 1;
 
-            //aqui retornamos o dia e o ano junto com o resultado dos calculos.
-            return long.Parse(dataString + number.ToString().Substring(6));
+                //aqui retornamos o dia e o ano junto com o resultado dos calculos.
+                return long.Parse(dataString + number.ToString().Substring(6));
             }
             catch (Exception) { return long.Parse(dataString + (1).ToString("D6")); }
         }
