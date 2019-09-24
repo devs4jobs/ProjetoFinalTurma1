@@ -125,8 +125,6 @@ namespace Core
             return new Retorno { Status = true, Resultado = new List<string> { " seu Ticket foi Deletado com Sucesso!" } };
         }
 
-
-
         public Retorno BuscarTicketporNumeroDoTicket(string Usertoken, string NumeroTicketQueVem)
 
         {
@@ -190,7 +188,7 @@ namespace Core
                 switch (StatusAtual.ToUpper())
                 {
 
-                    case "FECHADO":
+                    case "CONCLUIDO":
                         ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Status.FECHADO && t.AtendenteId == usuario.Id).ToList();
                         break;
 
@@ -214,9 +212,6 @@ namespace Core
                     return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string>
                     { "Não foi possivel realizar a paginação" } } : new Retorno
                     { Status = true, Paginacao = Paginacao, Resultado =_mapper.Map<List<TicketRetorno>>(ticketsAtendente) };
-
-                    return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsAtendente) };
-
                 }
 
                 Paginacao.Paginar(1, 10, ticketsAtendente.Count());
@@ -226,8 +221,6 @@ namespace Core
             }
 
             // busco pelos tickets daquele especifico usuario 
-
-
 
             var ticketsCliente = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("ABERTO") || c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE") && c.ClienteId == Guid.Parse(Usertoken)).ToList();
 
