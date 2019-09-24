@@ -49,6 +49,9 @@ namespace Core
             if (Ticket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
 
+            if(Ticket.Status == Status.FECHADO)
+                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel responder um ticket fechado!" } };
+
             _resposta.UsuarioId = Guid.Parse(tokenAutor);
 
             if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)

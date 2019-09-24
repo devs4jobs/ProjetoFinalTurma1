@@ -61,11 +61,8 @@ namespace ApiForum.Controllers
         /// <param name="NumeroTicket"></param>
         /// <returns>Retorna ticket que possui o Id inserido.</returns>
         [HttpGet("{NumeroTicket}")]
-<<<<<<< HEAD
-        public IActionResult ProcurarTicketPorNumero([FromHeader]string autorToken, string NumeroTicket)
-=======
         public async Task<IActionResult> ProcurarTicketPorId([FromHeader]string autorToken, string NumeroTicket)
->>>>>>> Guilherme
+
         {
             var Core = new TicketCore(_Mapper, _contexto);
             var result = await Core.BuscarTicketporNumeroDoTicket(autorToken, NumeroTicket);
@@ -137,7 +134,7 @@ namespace ApiForum.Controllers
         {
             var Core = new TicketCore(_contexto);
             var result = await  Core.AvaliarTicket(autorToken, TicketID, avaliacao);
-            return result.Status ? Ok(Core) : Ok(Core);
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
