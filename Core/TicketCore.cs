@@ -71,6 +71,7 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
+
         public Retorno AtualizarTicket(string Usertoken, string TicketID, TicketUpadateView ticketView)
         {
             //verifico login.
@@ -91,6 +92,7 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(ticketSelecionado) };
         }
+
         public Retorno DeletarTicket(string Usertoken, string TicketID)
         {
             //verifico login.
