@@ -2,6 +2,8 @@
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using System.Threading.Tasks;
+
 namespace ApiForum.Controllers
 {
     [Produces("application/json")]
@@ -32,12 +34,13 @@ namespace ApiForum.Controllers
         /// <param name="resposta"></param>
         /// <param name="autorToken"></param>
         [HttpPost]
-        public IActionResult CadastrarResposta([FromBody] RespostaView resposta, [FromHeader] string autorToken)
+        public async Task<IActionResult> CadastrarResposta([FromBody] RespostaView resposta, [FromHeader] string autorToken)
         {
-            var Core = new RespostaCore(resposta, _contexto,_mapper).CadastrarResposta(autorToken);
-            return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", Core): (IActionResult)Ok(Core);
+            var Core = new RespostaCore(resposta, _contexto, _mapper);
+             var result = await Core.CadastrarResposta(autorToken);
+            return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
         }
-    
+
         /// <summary>
         ///  Busco a Resposta do Id Inserido.
         /// </summary>
@@ -45,10 +48,11 @@ namespace ApiForum.Controllers
         /// <param name="RespostaID"></param>
         /// <returns>Retorno a Resposta.</returns>
         [HttpGet("{RespostaID}")]
-        public IActionResult GetIdResposta([FromHeader]string autorToken, string RespostaID)
+        public async Task<IActionResult> GetIdResposta([FromHeader]string autorToken, string RespostaID)
         {
-            var Core = new RespostaCore(_contexto,_mapper).BuscarRespostas(autorToken, RespostaID);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new RespostaCore(_contexto, _mapper);
+            var result = await  Core.BuscarRespostas(autorToken, RespostaID);
+            return result.Status ? Ok(result) : Ok(result);
         }
         /// <summary>
         /// Atualizar a Resposta do Id inserido.
@@ -66,10 +70,11 @@ namespace ApiForum.Controllers
         /// <param name="resposta"></param>
         /// <returns>Retorno a Resposta Atualizada.</returns>
         [HttpPut("{RespostaID}")]
-        public IActionResult AtualizarRespostaId([FromHeader]string autorToken, string RespostaID, RespostaUpdateView resposta)
+        public async Task<IActionResult> AtualizarRespostaId([FromHeader]string autorToken, string RespostaID, RespostaUpdateView resposta)
         {
-            var Core = new RespostaCore(_contexto,_mapper).EditarResposta(autorToken, RespostaID, resposta);
-            return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);
+            var Core = new RespostaCore(_contexto, _mapper);
+            var result = await Core.EditarResposta(autorToken, RespostaID, resposta);
+            return result.Status ? Accepted(result) : (IActionResult)Ok(result);
         }
         /// <summary>
         /// Deletar a Resposta do Id Inserido.
@@ -78,10 +83,11 @@ namespace ApiForum.Controllers
         /// <param name="RespostaID"></param>
         /// <returns>Retorno uma mensagem com Status da Operação.</returns>
         [HttpDelete("{RespostaID}")]
-        public IActionResult DeletarRespostaId([FromHeader]string autorToken, string RespostaID)
+        public async Task<IActionResult> DeletarRespostaId([FromHeader]string autorToken, string RespostaID)
         {
-            var Core = new RespostaCore(_contexto).DeletarResposta(autorToken, RespostaID);
-            return Core.Status ? Ok(Core) : Ok(Core);
+            var Core = new RespostaCore(_contexto);
+            var result = await Core.DeletarResposta(autorToken, RespostaID);
+            return result.Status ? Ok(result) : Ok(result);
         }
     }
 }

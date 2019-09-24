@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using Core.Util;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+
 namespace Core
 {
     public class UsuarioCore : AbstractValidator<Usuario>
@@ -30,7 +33,7 @@ namespace Core
         }
 
         //Método para cadastro de usuario
-        public Retorno CadastrarUsuario()
+        public async Task<Retorno> CadastrarUsuario()
         {
             var validar = Validate(_usuario);
             if (!validar.IsValid)
@@ -40,18 +43,18 @@ namespace Core
             if (_dbcontext.Usuarios.Any(e => e.Email == _usuario.Email))
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
 
-            _dbcontext.Usuarios.Add(_usuario);
+           await _dbcontext.Usuarios.AddAsync(_usuario);
 
-            _dbcontext.SaveChanges();
+           await _dbcontext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { "Usuário cadastrado com sucesso!" } };
         }
 
         //Método para logar o usuario na plataforma.
-        public Retorno LogarUsuario(LoginView loginView)
+        public async Task<Retorno> LogarUsuario(LoginView loginView)
         {
             //Vejo se o login esta correto, se nao ja retorno uma mensagem.
-            var usuarioLogin = _dbcontext.Usuarios.FirstOrDefault(u => u.Email == loginView.Email && u.Senha == loginView.Senha);
+            var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email && u.Senha == loginView.Senha);
 
             if (usuarioLogin == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
