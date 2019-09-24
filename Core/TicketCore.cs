@@ -120,25 +120,24 @@ namespace Core
       
             return new Retorno { Status = true, Resultado = new List<string> { " seu Ticket foi Deletado com Sucesso!" } };
         }
-        public Retorno BuscarTicketporID(string Usertoken, string TicketID)
+        public Retorno BuscarTicketporNumeroDoTicket(string Usertoken, long NumeroTicketQueVem)
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-            //verifico se o Ticket ID é valido.
-            if (!Guid.TryParse(TicketID, out Guid tId))
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
-
             var cliente = _serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken));
             if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
-            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == tId && t.ClienteId == cliente.Id || t.Id == tId && t.AtendenteId == cliente.Id);
+            var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.NumeroTicket == NumeroTicketQueVem && t.ClienteId == cliente.Id || t.NumeroTicket == NumeroTicketQueVem && t.AtendenteId == cliente.Id);
 
-            TicketSolicitado.LstRespostas = _serviceContext.Respostas.Include(r => r.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).OrderBy(c => c.DataCadastro).ToList(); 
+            TicketSolicitado.LstRespostas = _serviceContext.Respostas.Include(r => r.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).OrderBy(c => c.DataCadastro).ToList();
 
-            return TicketSolicitado != null ? new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(TicketSolicitado) } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
+            var TicketRetorno = _mapper.Map<TicketRetorno>(TicketSolicitado);
+            if (TicketRetorno.LstRespostas.Count == 0) TicketRetorno.LstRespostas = null;
+
+            return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketRetorno } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
 
         public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro,string StatusAtual)

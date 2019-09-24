@@ -52,15 +52,15 @@ namespace ApiForum.Controllers
         }
 
         /// <summary>
-        /// ProcurarTicketPorId
+        /// Procurar Ticket pelo numero dele.
         /// </summary>
         /// <param name="autorToken"></param>
-        /// <param name="TicketID"></param>
+        /// <param name="NumeroTicket"></param>
         /// <returns>Retorna ticket que possui o Id inserido.</returns>
-        [HttpGet("{TicketID}")]
-        public IActionResult ProcurarTicketPorId([FromHeader]string autorToken, string TicketID)
+        [HttpGet("{NumeroTicket}")]
+        public IActionResult ProcurarTicketPorId([FromHeader]string autorToken, long NumeroTicket)
         {
-            var Core = new TicketCore(_Mapper, _contexto).BuscarTicketporID(autorToken, TicketID);
+            var Core = new TicketCore(_Mapper, _contexto).BuscarTicketporNumeroDoTicket(autorToken, NumeroTicket);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
