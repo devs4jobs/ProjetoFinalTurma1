@@ -125,8 +125,6 @@ namespace Core
             return new Retorno { Status = true, Resultado = new List<string> { " seu Ticket foi Deletado com Sucesso!" } };
         }
 
-
-
         public Retorno BuscarTicketporNumeroDoTicket(string Usertoken, string NumeroTicketQueVem)
 
         {
@@ -143,14 +141,12 @@ namespace Core
 
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
             var TicketSolicitado = _serviceContext.Tickets.FirstOrDefault(t => t.NumeroTicket == numeroticket && t.ClienteId == cliente.Id || t.NumeroTicket == numeroticket && t.AtendenteId == cliente.Id);
+            if(TicketSolicitado == null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
             TicketSolicitado.LstRespostas = _serviceContext.Respostas.Include(r => r.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).OrderBy(c => c.DataCadastro).ToList();
 
 
-            var TicketRetorno = _mapper.Map<TicketRetorno>(TicketSolicitado);
-            if (TicketRetorno.LstRespostas.Count == 0) TicketRetorno.LstRespostas = null;
-
-            return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketRetorno } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
+            return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(TicketSolicitado) };
         }
 
         public Retorno BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro, string StatusAtual)
@@ -214,33 +210,24 @@ namespace Core
                     return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string>
                     { "Não foi possivel realizar a paginação" } } : new Retorno
                     { Status = true, Paginacao = Paginacao, Resultado =_mapper.Map<List<TicketRetorno>>(ticketsAtendente) };
-
-                    return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possivel realizar a paginação" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsAtendente) };
-
+                   
                 }
 
                 Paginacao.Paginar(1, 10, ticketsAtendente.Count());
-                var retorno1 = _mapper.Map<List<TicketRetorno>>(ticketsAtendente.Take(10));
 
-                return retorno1.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { $"VocÊ nao tem tickets {StatusAtual} momento!" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno1 };
+                return _mapper.Map<List<TicketRetorno>>(ticketsAtendente.Take(10)).Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { $"VocÊ nao tem tickets {StatusAtual} momento!" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsAtendente.Take(10)) };
             }
 
             // busco pelos tickets daquele especifico usuario 
-
-
-
             var ticketsCliente = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("ABERTO") || c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE") && c.ClienteId == Guid.Parse(Usertoken)).ToList();
 
               ticketsCliente = StatusAtual.ToUpper() == "FECHADO" ?   _serviceContext.Tickets.Where(c => c.Status == Status.FECHADO && c.ClienteId == usuario.Id).ToList() : 
                _serviceContext.Tickets.Where(c => c.Status != Status.FECHADO && c.ClienteId == usuario.Id).ToList();
 
 
-            
             _serviceContext.SaveChanges();
-
             // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
 
-            // caso for posivel realizar a paginação se nao for exibo a quantidade padrão = 10
 
             if (NumeroPagina > 0 && QuantidadeRegistro > 0)
             {
@@ -251,9 +238,8 @@ namespace Core
                 new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsCliente) };
             }
             Paginacao.Paginar(1, 10, ticketsCliente.Count());
-            var retorno2 = _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10));
 
-            return  retorno2.Count() == 0 ? new Retorno { Status = false,  Resultado = new List<string> { $"VocÊ nao tem tickets {StatusAtual} momento!" } }: new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno2 };
+            return _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10)).Count() == 0 ? new Retorno { Status = false,  Resultado = new List<string> { $"VocÊ nao tem tickets {StatusAtual} momento!" } }: new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10)) };
         }
         public Retorno TomarPosseTicket(string Usertoken, string numeroTicket)
         {
@@ -292,8 +278,6 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             var todosTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status != Enum.Parse<Status>("FECHADO")).ToList();
-
-            // todosTickets.ForEach(c => AtribuiLista(c));
             
             // nova instancia da paganicação
             var Paginacao = new Paginacao();
@@ -404,52 +388,6 @@ namespace Core
                 return long.Parse(dataString + number.ToString().Substring(6));
             }
             catch (Exception) { return long.Parse(dataString + (1).ToString("D6")); }
-        }
-
-
-       //Método para realizar a atribuicao na lista da lista de respostas no tciket
-      public void AtribuiLista(Ticket ticket)
-      {
-          var ListaResposta = _serviceContext.Respostas.Where(c => c.TicketId == ticket.Id).ToList();
-          var oAtendente = _serviceContext.Usuarios.FirstOrDefault(c => c.Id == ticket.AtendenteId);
-          var oUsuario = _serviceContext.Usuarios.FirstOrDefault(c => c.Id == ticket.ClienteId);
-      
-          //if (oAtendente != null)
-          //    ticket.Atendente = new UsuarioRetorno { Nome = oAtendente.Nome, Email = oAtendente.Email };
-      
-          //if (oUsuario != null)
-          //    ticket.Cliente = new UsuarioRetorno { Nome = oUsuario.Nome, Email = oUsuario.Email };
-      
-          //foreach (var Resposta in ListaResposta)
-          //{
-          //    if (Resposta.UsuarioId == oAtendente.Id)
-          //        Resposta.Usuario = new UsuarioRetorno { Nome = oAtendente.Nome, Email = oAtendente.Email };
-      
-          //    if (Resposta.UsuarioId == oUsuario.Id)
-          //        Resposta.Usuario = new UsuarioRetorno { Nome = oUsuario.Nome, Email = oUsuario.Email };
-          //}
-      
-          ticket.LstRespostas = ListaResposta.OrderBy(c => c.DataCadastro).ToList();   
-      }
-
-        public Retorno BuscarTicketDoUsuario(string Usertoken, string NumeroTicket)
-        {
-            //verifico login.
-            if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
-
-            //verifico se o Ticket ID é valido.
-            if (!long.TryParse(NumeroTicket, out long tId))
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
-       
-            if (_serviceContext.Usuarios.FirstOrDefault(u => u.Id == Guid.Parse(Usertoken)) == null) return new Retorno
-            { Status = false, Resultado = new List<string> { "Usuário não identificado!" } };
-          
-            AtribuiLista(_serviceContext.Tickets.FirstOrDefault(t => t.NumeroTicket == tId));
-
-            return _serviceContext.Tickets.FirstOrDefault(t => t.NumeroTicket == tId) != null ? 
-            new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(_serviceContext.Tickets.FirstOrDefault(t => t.NumeroTicket == tId)) } : 
-            new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
     }
 }

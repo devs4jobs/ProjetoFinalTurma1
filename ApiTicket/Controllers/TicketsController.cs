@@ -58,7 +58,7 @@ namespace ApiForum.Controllers
         /// <param name="NumeroTicket"></param>
         /// <returns>Retorna ticket que possui o Id inserido.</returns>
         [HttpGet("{NumeroTicket}")]
-        public IActionResult ProcurarTicketPorId([FromHeader]string autorToken, string NumeroTicket)
+        public IActionResult ProcurarTicketPorNumero([FromHeader]string autorToken, string NumeroTicket)
         {
             var Core = new TicketCore(_Mapper, _contexto).BuscarTicketporNumeroDoTicket(autorToken, NumeroTicket);
             return Core.Status ? Ok(Core) : Ok(Core);
@@ -141,13 +141,6 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
-
-        [HttpGet("{TicketID}")]
-        public IActionResult GetTicketUsuario([FromHeader]string autorToken, string TicketID)
-        {
-            var Core = new TicketCore(_Mapper, _contexto).BuscarTicketDoUsuario(autorToken, TicketID);
-            return Core.Status ? Ok(Core) : Ok(Core);
-        }
 
         /// <summary>
         /// Trocar o Atendente que está atendendo o Ticket.
