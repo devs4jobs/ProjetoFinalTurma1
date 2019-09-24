@@ -24,7 +24,7 @@ namespace ApiForum.Controllers
         ///     Sample request:
         /// 
         ///         {
-        ///             "mensagem" : "Oi você pode me ajudar estou com problemas, Help!."	
+        ///             "mensagem" : "Oi você pode me ajudar estou com problemas, Help!.",	
         ///             "ticketId": "id do ticket em questão."
         ///         }
         ///                  
@@ -51,7 +51,7 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : Ok(Core);
         }
         /// <summary>
-        /// Atualizo a Resposta do Id inserido.
+        /// Atualizar a Resposta do Id inserido.
         /// </summary>
         /// <remarks>
         ///     Sample request:
@@ -72,7 +72,7 @@ namespace ApiForum.Controllers
             return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);
         }
         /// <summary>
-        /// Deleto a Resposta do Id Inserido.
+        /// Deletar a Resposta do Id Inserido.
         /// </summary>
         /// <param name="autorToken"></param>
         /// <param name="RespostaID"></param>

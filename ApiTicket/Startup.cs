@@ -5,13 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.StaticFiles;
 using Model;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
 using System.IO;
 using System;
-
 namespace ApiTicket
 {
     public class Startup
@@ -63,10 +61,7 @@ namespace ApiTicket
                 cfg.CreateMap<LoginView, Usuario>();
 
                 //mapeamento dos tickets
-                cfg.CreateMap<TicketView, Ticket>();
-                cfg.CreateMap<TicketUpadateView, Ticket>()
-                    .ForMember(dest => dest.Avaliacao, opt => opt.Condition(ori => ori.Avaliacao != null))
-                    .ForMember(dest => dest.Status, opt => opt.Condition(ori => ori.Status != null))
+                cfg.CreateMap<TicketView, Ticket>()
                     .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null))
                     .ForMember(dest => dest.Mensagem, opt => opt.Condition(ori => ori.Mensagem != null));
 
