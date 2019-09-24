@@ -25,7 +25,7 @@ namespace ApiForum.Controllers
         /// 
         ///	    {
         ///  		"titulo": "Meu Computador se encontra com  problemas.",
-        ///  		"mensagem": "Oi meu comprei meu computador recentemente e está com defeitos.",
+        ///  		"mensagem": "Oi meu comprei meu computador recentemente e está com defeitos."
         ///	    }
         ///
         /// </remarks>
@@ -65,7 +65,7 @@ namespace ApiForum.Controllers
         }
 
         /// <summary>
-        /// Busco todos Tickets
+        /// Buscar todos Tickets
         /// </summary>
         /// <param name="autorToken"></param>
         /// <param name="numeroPagina"></param>
@@ -144,7 +144,7 @@ namespace ApiForum.Controllers
         }
 
         /// <summary>
-        /// Troco o Atendente que está atendendo o Ticket.
+        /// Trocar o Atendente que está atendendo o Ticket.
         /// </summary>
         /// <param name="numeroTicket"></param>
         /// <param name="autorToken"></param>

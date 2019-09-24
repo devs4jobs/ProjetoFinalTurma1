@@ -4,7 +4,6 @@ using FluentValidation;
 using Model;
 using System.Collections.Generic;
 using System.Linq;
-
 namespace Core
 {
     public class UsuarioCore : AbstractValidator<Usuario>

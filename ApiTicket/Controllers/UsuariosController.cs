@@ -25,7 +25,7 @@ namespace ApiForum.Controllers
         ///	    {
         ///         "nome": "Rafael",
         ///         "email": "rafaelJunior@dev4jobs.com",
-        ///         "senha": "Senha123"
+        ///         "senha": "Senha123",
         ///         "confirmaSenha": "Senha123",
         ///         "tipo": "Atendente"
         ///	    }
@@ -41,7 +41,7 @@ namespace ApiForum.Controllers
         }
 
         /// <summary>
-        /// Criar Usuário.
+        /// Autenticar Usuário.
         /// </summary>
         /// <remarks>
         /// Sample request:

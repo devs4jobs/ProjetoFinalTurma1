@@ -5,10 +5,7 @@ using Core.Util;
 using System;
 using System.Collections.Generic;
 using AutoMapper;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.CSharp.RuntimeBinder;
-
 namespace Core
 {
     /// <summary>
