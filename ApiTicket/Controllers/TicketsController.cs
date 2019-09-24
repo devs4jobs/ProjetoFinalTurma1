@@ -142,12 +142,7 @@ namespace ApiForum.Controllers
         }
 
 
-        [HttpGet("{TicketID}")]
-        public IActionResult GetTicketUsuario([FromHeader]string autorToken, string TicketID)
-        {
-            var Core = new TicketCore(_Mapper, _contexto).BuscarTicketDoUsuario(autorToken, TicketID);
-            return Core.Status ? Ok(Core) : Ok(Core);
-        }
+      
 
         /// <summary>
         /// Trocar o Atendente que está atendendo o Ticket.
