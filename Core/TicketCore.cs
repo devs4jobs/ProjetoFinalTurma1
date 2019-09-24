@@ -222,7 +222,7 @@ namespace Core
             }
             Paginacao.Paginar(1, 10, ticketsCliente.Count());
 
-
+            //assasaassasasa q
             return _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10)).Count() == 0 ? new Retorno { Status = false,  Resultado = new List<string> { $"VocÊ nao tem tickets {StatusAtual} momento!" } }: new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10)) };
         }
         public async Task<Retorno> TomarPosseTicket(string Usertoken, string numeroTicket)
@@ -248,6 +248,7 @@ namespace Core
             TicketSolicitado.AtendenteId = atendente.Id;
             TicketSolicitado.Status = Status.AGUARDANDO_RESPOSTA_DO_ATENDENTE;
 
+            ///asdassasaassasa
             await _serviceContext.SaveChangesAsync();
             return new Retorno { Status = true, Resultado = new List<string> { $"{atendente.Nome} você atribuiu esse Ticket a sua base." } };
         }
@@ -273,6 +274,7 @@ namespace Core
                 return new Retorno { Status = true, Paginacao = Paginacao, Resultado = todosTickets.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
             }
 
+           // /asasaassaasassa
             Paginacao.Paginar(1, 10, todosTickets.Count());
 
             return new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(todosTickets.Take(10)) };
