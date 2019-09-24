@@ -5,7 +5,6 @@ using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 namespace Core
 {
     public class RespostaCore : AbstractValidator<Resposta>
@@ -18,11 +17,11 @@ namespace Core
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
-        public RespostaCore(RespostaView respostaquevem, ServiceContext ServiceContext, IMapper mapper)
+        public RespostaCore(RespostaView RespostaQueVem, ServiceContext ServiceContext, IMapper mapper)
         {
             _mapper = mapper;
             _serviceContext = ServiceContext;
-            _resposta = _mapper.Map<Resposta>(respostaquevem);
+            _resposta = _mapper.Map<Resposta>(RespostaQueVem);
 
 
             RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
@@ -30,7 +29,6 @@ namespace Core
         }
 
         //Método para o cadastro de respostas
-
 
         public Retorno CadastrarResposta(string tokenAutor)
         {
@@ -61,7 +59,7 @@ namespace Core
             _serviceContext.Add(_resposta);
             _serviceContext.SaveChanges();
 
-            return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(_resposta) };
+            return new Retorno { Status = true, Resultado = new List<string> {"Reposta enviada com sucesso!" } };
         }
 
         //Método para buscar todas as respostas daquele ticket em especificio 

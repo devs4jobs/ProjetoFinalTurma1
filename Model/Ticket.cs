@@ -23,7 +23,7 @@ namespace Model
         [ForeignKey("Usuarios")]
         public Guid? AtendenteId { get; set; }
         public List<Resposta> LstRespostas { get; set; }
-        public Avaliacao? Avaliacao { get; set; }
+        public Avaliacao? Avaliacao { get; set; } = Model.Avaliacao.NAO_AVALIADO;
     }
 }
  
