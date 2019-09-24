@@ -5,8 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.StaticFiles;
 using Model;
 using Swashbuckle.AspNetCore.Swagger;
+using System.Reflection;
+using System.IO;
+using System;
 
 namespace ApiTicket
 {
@@ -28,9 +32,27 @@ namespace ApiTicket
 
             services.AddDbContext<ServiceContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StringConexao")), ServiceLifetime.Scoped);
 
-            services.AddSwaggerGen(s =>
+
+            services.AddSwaggerGen(opt =>
             {
-                s.SwaggerDoc("v1", new Info { Title = "Ticket Api", Version = "v1" });
+
+                opt.SwaggerDoc("v2", new Info
+                {
+                    Version = "v2",
+                    Title = "Ticket API",
+                    Description = "Aplicação ASP.NET CORE feita para HelpDesk.",
+                    TermsOfService = "https://github.com/devs4jobs/ProjetoFinalTurma1",
+                    Contact = new Contact
+                    {
+                        Name = "1ª Turma Dev4Jobs",
+                        Url = "https://www.facebook.com/Dev4Jobs/"
+                    }
+                });
+                
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                opt.IncludeXmlComments(xmlPath);
+
             });
 
             var config = new MapperConfiguration(cfg =>
@@ -70,11 +92,16 @@ namespace ApiTicket
             else
                 app.UseHsts();
 
+            app.UseStaticFiles();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Ticket Api");
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "Ticket API");
                 c.RoutePrefix = string.Empty;
             });
             app.UseHttpsRedirection();
