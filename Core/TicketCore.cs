@@ -130,23 +130,21 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-            var cliente = await _serviceContext.Usuarios.SingleOrDefaultAsync(u => u.Id == Guid.Parse(Usertoken));
-            if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
-
             if (!long.TryParse(NumeroTicketQueVem, out long numeroticket))
                 return new Retorno { Status = false, Resultado = new List<string> { "Número do ticket incorreto!" } };
 
-            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
-            var TicketSolicitado = await _serviceContext.Tickets.SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == cliente.Id || t.NumeroTicket == numeroticket && t.AtendenteId == cliente.Id);
+            var cliente = await _serviceContext.Usuarios.SingleOrDefaultAsync(u => u.Id == Guid.Parse(Usertoken));
+            if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
 
-            TicketSolicitado.LstRespostas = await _serviceContext.Respostas.Include(r => r.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).OrderBy(c => c.DataCadastro).ToListAsync();
+            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
+            var TicketSolicitado = await _serviceContext.Tickets.Include(c=>c.LstRespostas).SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == cliente.Id || t.NumeroTicket == numeroticket && t.AtendenteId == cliente.Id);
+
+            TicketSolicitado.LstRespostas = await _serviceContext.Respostas.Where(c => c.TicketId == TicketSolicitado.Id).ToListAsync();
 
             var TicketRetorno = _mapper.Map<TicketRetorno>(TicketSolicitado);
-            if (TicketRetorno.LstRespostas.Count == 0) TicketRetorno.LstRespostas = null;
 
             return TicketSolicitado != null ? new Retorno { Status = true, Resultado = TicketRetorno } : new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
         }
-
         public async Task<Retorno> BuscarTodosTickets(string Usertoken, int NumeroPagina, int QuantidadeRegistro, string StatusAtual)
         {
             //verifico login.
@@ -244,7 +242,6 @@ namespace Core
             await _serviceContext.SaveChangesAsync();
             return new Retorno { Status = true, Resultado = new List<string> { $"{atendente.Nome} você atribuiu esse Ticket a sua base." } };
         }
-
         public async Task<Retorno> AvaliarTicket(string tokenAutor, string ticketId, string avaliacao)
         {
             //verifico login.
@@ -262,7 +259,7 @@ namespace Core
             // busco pelo ticket e faço a validação de o ticket precisar estar fechado
             var Oticket = await _serviceContext.Tickets.SingleOrDefaultAsync(c => c.Id == Guid.Parse(ticketId) && c.ClienteId == Guid.Parse(tokenAutor));
 
-            if (Oticket.Avaliacao != null)
+            if (Oticket.Avaliacao != 0||Oticket.Avaliacao!=null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Este ticket já foi avaliado." } };
 
             if (Oticket.Status != Status.FECHADO)
@@ -274,7 +271,6 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = new List<string> { "Avaliação registrada com sucesso!" } };
         }
-
         // metódo para realizar o fechamento do ticket
         public async Task<Retorno> FecharTicket(string tokenAutor, string ticketId)
         {
@@ -292,7 +288,7 @@ namespace Core
             if (oTicket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
-            if (oTicket.AtendenteId == Guid.Parse(tokenAutor))
+            if (oTicket.ClienteId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Somente clientes podem fechar seus tickets!" } };
 
             // atribuo e fecho o ticket
@@ -302,7 +298,6 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = new List<string> { "Ticket fechado com sucesso!" } };
         }
-
         public async Task<Retorno> TrocarAtendente(string Numero, string tokenAutor)
         {
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
