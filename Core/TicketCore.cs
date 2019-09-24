@@ -160,10 +160,10 @@ namespace Core
             {
                 List<Ticket> ticketsAtendente;
                 // busco pelos tickets daquele especifico usuario 
-                if (StatusAtual == "FECHADO")
+                if (StatusAtual.ToUpper() == "FECHADO")
                     ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("FECHADO") && t.AtendenteId == usuario.Id).ToList();
 
-                else if (StatusAtual == "ANDAMENTO")
+                else if (StatusAtual.ToUpper() == "ANDAMENTO")
                     ticketsAtendente = _serviceContext.Tickets.Where(t => t.Status == Enum.Parse<Status>("ABERTO") || t.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_CLIENTE")
                     && t.AtendenteId == usuario.Id).ToList();
 
@@ -180,6 +180,8 @@ namespace Core
 
                 Paginacao.Paginar(1, 10, ticketsAtendente.Count());
                 var retorno1 = _mapper.Map<List<TicketRetorno>>(ticketsAtendente.Take(10));
+
+              //  retorno1.ForEach(c => c.LstRespostas = null);
 
                 return retorno1.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "VocÊ nao tem tickets no momento!" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = retorno1 };
             }
@@ -202,7 +204,8 @@ namespace Core
             }
             Paginacao.Paginar(1, 10, ticketsCliente.Count());
             var retorno2 = _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10));
-            
+
+          //  retorno2.ForEach(c => c.LstRespostas = null);
 
             return new Retorno { Status = true, Paginacao = Paginacao, Resultado =  retorno2};
         }
