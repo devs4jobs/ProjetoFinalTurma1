@@ -283,7 +283,7 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
-            if (int.TryParse(avaliacao, out int num) || num < 0 || num > 4)
+            if (int.TryParse(avaliacao, out int num) || num < 1 || num > 4)
                 return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
 
             //verifico se o Ticket ID é valido.
