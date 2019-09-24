@@ -30,7 +30,6 @@ namespace ApiTicket
 
             services.AddDbContext<ServiceContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StringConexao")), ServiceLifetime.Scoped);
 
-
             services.AddSwaggerGen(opt =>
             {
 
