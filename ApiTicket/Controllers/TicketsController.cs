@@ -141,7 +141,6 @@ namespace ApiForum.Controllers
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
-
         /// <summary>
         /// Trocar o Atendente que está atendendo o Ticket.
         /// </summary>
