@@ -224,7 +224,7 @@ namespace Core
 
             var ticketsCliente = _serviceContext.Tickets.Where(c => c.Status == Enum.Parse<Status>("ABERTO") || c.Status == Enum.Parse<Status>(" AGUARDANDO_RESPOSTA_DO_ATENDENTE") && c.ClienteId == Guid.Parse(Usertoken)).ToList();
 
-              ticketsCliente = StatusAtual.ToUpper() == "FECHADO" ?   _serviceContext.Tickets.Where(c => c.Status == Status.FECHADO && c.ClienteId == usuario.Id).ToList() : 
+              ticketsCliente = StatusAtual.ToUpper() == "CONCLUIDO" ?   _serviceContext.Tickets.Where(c => c.Status == Status.FECHADO && c.ClienteId == usuario.Id).ToList() : 
                _serviceContext.Tickets.Where(c => c.Status != Status.FECHADO && c.ClienteId == usuario.Id).ToList();
 
 
