@@ -87,9 +87,7 @@ namespace ApiForum.Controllers
         ///       
         ///         {
         ///             "titulo": "Meu Computador se encontra com problemas há 2 Dias.",
-        ///             "mensagem": "Oi meu comprei meu computador recentemente e está com defeitos na inicialização.",
-        ///             "avaliacao": 5,
-        ///             "status": 1
+        ///             "mensagem": "Oi meu comprei meu computador recentemente e está com defeitos na inicialização."
         ///         }
         ///         
         /// </remarks>
@@ -97,7 +95,7 @@ namespace ApiForum.Controllers
         /// <param name="TicketID"></param>
         /// <param name="autorToken"></param>
         [HttpPut("{TicketID}")]
-        public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID, [FromBody] TicketUpadateView ticket)
+        public IActionResult AtualizarTicketId([FromHeader]string autorToken, string TicketID, [FromBody] TicketView ticket)
         {
             var Core = new TicketCore(_Mapper, _contexto).AtualizarTicket(autorToken, TicketID, ticket);
             return Core.Status ? Accepted(Core) : (IActionResult)Ok(Core);

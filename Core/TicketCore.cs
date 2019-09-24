@@ -70,7 +70,7 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{cliente.Nome} seu Ticket foi cadastrado com Sucesso!" } };
         }
-        public Retorno AtualizarTicket(string Usertoken, string TicketID, TicketUpadateView ticketView)
+        public Retorno AtualizarTicket(string Usertoken, string TicketID, TicketView ticketView)
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
@@ -81,9 +81,11 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
 
             var ticketSelecionado = _serviceContext.Tickets.FirstOrDefault(t => t.Id == tId);
-
+     
             //vejo se o cliente que ta longado é o mesmo que está Atualizando o ticket.
             if (ticketSelecionado.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é o mesmo que postou o ticket!" } };
+
+            if (ticketSelecionado.Status == Status.FECHADO) return new Retorno { Status = false, Resultado = new List<string> { "Não se pode atualizar Tickets já encerrados." } };
 
             _mapper.Map(ticketView, ticketSelecionado);
             _serviceContext.SaveChanges();
@@ -248,7 +250,10 @@ namespace Core
             // busco pelo ticket e faço a validação de o ticket precisar estar fechado
             var Oticket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == Guid.Parse(ticketId) && c.ClienteId == Guid.Parse(tokenAutor));
 
-            if (Oticket.Status == Enum.Parse<Status>("ABERTO"))
+            if(Oticket.Avaliacao != null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Este ticket já foi avaliado." } };
+
+            if (Oticket.Status != Status.FECHADO)
                 return new Retorno { Status = false, Resultado = new List<string> { "O ticket precisa estar fechado para ocorrer a avaliação" } };
 
             Oticket.Avaliacao = result;
@@ -276,7 +281,7 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
 
             // atribuo e fecho o ticket
-            oTicket.Status = Enum.Parse<Status>("FECHADO");
+            oTicket.Status = Status.FECHADO;
 
             return new Retorno { Status = true, Resultado = new List<string> { "Ticket fechado com sucesso!" } };
         }
