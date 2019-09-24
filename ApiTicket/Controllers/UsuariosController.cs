@@ -10,7 +10,7 @@ namespace ApiForum.Controllers
     public class UsuariosController : ControllerBase
     {
         //Construtor contendo o contexto.
-        private ServiceContext _contexto { get; set; }  
+        private ServiceContext _contexto { get; set; }
         private readonly IMapper _mapper;
 
         // construtor para a utilização do automapper por meio de injeçao de dependecia
@@ -22,21 +22,21 @@ namespace ApiForum.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     Post/Usuarios 
-        ///     {
-        ///       "nome": "string",
-        ///       "email": "string",
-        ///       "senha": "string",
-        ///       "confirmaSenha": "string",
-        ///       "tipo": "string"  
-        ///     }
+        ///	    {
+        ///         "nome": "Rafael",
+        ///         "email": "rafaelJunior@dev4jobs.com",
+        ///         "senha": "Senha123"
+        ///         "confirmaSenha": "Senha123",
+        ///         "tipo": "Atendente"
+        ///	    }
         ///
         /// </remarks>
         /// <param name="usuarioView"></param>
+        ///  /// <returns>Retorna o Status de cadastro</returns>
         [HttpPost]
-        public IActionResult Cadastro([FromBody] UsuarioView usuarioView  )
+        public IActionResult Cadastro([FromBody] UsuarioView usuarioView)
         {
-            var Core = new UsuarioCore(usuarioView, _contexto,_mapper).CadastrarUsuario();
+            var Core = new UsuarioCore(usuarioView, _contexto, _mapper).CadastrarUsuario();
             return Core.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", Core) : (IActionResult)Ok(Core);
         }
 
@@ -45,15 +45,15 @@ namespace ApiForum.Controllers
         /// </summary>
         /// <remarks>
         /// Sample request:
+        /// 
+        ///	    {
+        ///  		"email": "rafaelJunior@dev4jobs.com",
+        ///  		"senha": "Senha123"
+        ///	    }
         ///
-        /// Post/Usuarios/Autenticar
-        ///
-        ///      {
-        ///        "email": "string",
-        ///        "senha": "string"
-        ///      }
         /// </remarks>
         /// <param name="loginView"></param>
+        /// <returns>Retorna o AutorToken </returns>
         [HttpPost("Autenticar")]
         public IActionResult Logar([FromBody] LoginView loginView)
         {

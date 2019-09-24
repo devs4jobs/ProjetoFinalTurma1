@@ -254,7 +254,7 @@ namespace Core
 
             // vejo se a avaliacao é valida
             if (!Enum.TryParse(avaliacao, out Avaliacao result))
-                return new Retorno { Status = false, Resultado = new List<string> { "Avaliação nao válida!" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
 
             // busco pelo ticket e faço a validação de o ticket precisar estar fechado
             var Oticket = _serviceContext.Tickets.FirstOrDefault(c => c.Id == Guid.Parse(ticketId) && c.ClienteId == Guid.Parse(tokenAutor));
