@@ -143,7 +143,7 @@ namespace Core
 
             var TicketSolicitado = await _serviceContext.Tickets.Include(c => c.LstRespostas).SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == cliente.Id || t.NumeroTicket == numeroticket && t.AtendenteId == cliente.Id);
 
-            TicketSolicitado.LstRespostas = await _serviceContext.Respostas.Include(c=>c.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).ToListAsync();
+            TicketSolicitado.LstRespostas = await _serviceContext.Respostas.Include(c=>c.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).OrderBy(e => e.DataCadastro).ToListAsync();
 
             var TicketRetorno = _mapper.Map<TicketRetorno>(TicketSolicitado);
 
