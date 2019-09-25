@@ -2,6 +2,8 @@
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using Model.Views.Receber;
+
 namespace ApiForum.Controllers
 {
     [Produces("application/json")]
@@ -75,7 +77,7 @@ namespace ApiForum.Controllers
         [HttpGet("Todos/{StatusAtual}")]
         public IActionResult BuscarTodosTickets([FromHeader]string autorToken, [FromQuery] int numeroPagina, [FromQuery]int quantidadePagina, string StatusAtual)
         {
-            var Core = new TicketCore(_Mapper,_contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina, StatusAtual);
+            var Core = new TicketCore(_Mapper, _contexto).BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina, StatusAtual);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
@@ -115,29 +117,15 @@ namespace ApiForum.Controllers
         }
 
         /// <summary>
-        /// O Cliente Avalia o Atendente.
-        /// </summary>
-        /// <param name="autorToken"></param>
-        /// <param name="TicketID"></param>
-        /// <param name="avaliacao"></param>
-        /// <returns>Retorna mensagem de Status da Avaliação.</returns>
-        [HttpPost("Avaliar/{TicketID}/{avaliacao}")]
-        public IActionResult AvaliarTicket([FromHeader]string autorToken, string TicketID, string avaliacao)
-        {
-            var Core = new TicketCore(_contexto).AvaliarTicket(autorToken, TicketID, avaliacao);
-            return Core.Status ? Ok(Core) : Ok(Core);
-        }
-
-        /// <summary>
         /// Cliente fecha o Ticket.
         /// </summary>
         /// <param name="autorToken"></param>
-        /// <param name="TicketID"></param>
+        /// <param name="Avaliacao"></param>
         /// <returns>Retorno uma mensagem de Status para o Cliente.</returns>
         [HttpPost("Fechar")]
-        public IActionResult FecharTicket(string autorToken, string TicketID)
+        public IActionResult FecharTicket([FromHeader]string autorToken, [FromBody] AvaliacaoView Avaliacao)
         {
-            var Core = new TicketCore(_contexto).FecharTicket(autorToken, TicketID);
+            var Core = new TicketCore(_contexto).FecharTicket(autorToken, Avaliacao);
             return Core.Status ? Ok(Core) : Ok(Core);
         }
 
