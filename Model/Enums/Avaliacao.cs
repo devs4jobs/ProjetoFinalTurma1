@@ -8,6 +8,5 @@
         BOM = 3,
         MUITO_BOM = 4,
         EXCELENTE = 5
-
     }
 }
