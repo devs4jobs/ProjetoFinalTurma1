@@ -141,7 +141,7 @@ namespace Core
 
             var TicketSolicitado = await _serviceContext.Tickets.Include(c=>c.LstRespostas).SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == cliente.Id || t.NumeroTicket == numeroticket && t.AtendenteId == cliente.Id);
 
-            TicketSolicitado.LstRespostas = await _serviceContext.Respostas.Where(c => c.TicketId == TicketSolicitado.Id).ToListAsync();
+            TicketSolicitado.LstRespostas = await _serviceContext.Respostas.Include(c=>c.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).ToListAsync();
 
             var TicketRetorno = _mapper.Map<TicketRetorno>(TicketSolicitado);
 
@@ -253,32 +253,6 @@ namespace Core
             return new Retorno { Status = true, Resultado = new List<string> { $"{atendente.Nome} você atribuiu esse Ticket a sua base." } };
         }
 
-
-
-        // Método para buscar os tickets disponiveis para o atendente
-        public Retorno BuscarTicketSemAtendente(string Usertoken, int NumeroPagina, int QuantidadeRegistro)
-        {
-            //verifico login.
-            if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
-
-            var todosTickets = _serviceContext.Tickets.Where(c => c.AtendenteId == null && c.Status != Enum.Parse<Status>("FECHADO")).ToList();
-            
-            // nova instancia da paganicação
-            var Paginacao = new Paginacao();
-  
-            // caso for possivel realizar a paginação se nao for exibo a quantidade padrão = 10
-            if (NumeroPagina > 0 && QuantidadeRegistro > 0)
-            {
-                Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, todosTickets.Count());
-                return new Retorno { Status = true, Paginacao = Paginacao, Resultado = todosTickets.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro) };
-            }
-
-           // /asasaassaasassa
-            Paginacao.Paginar(1, 10, todosTickets.Count());
-
-            return new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(todosTickets.Take(10)) };
-        }
         public async Task<Retorno> AvaliarTicket(string tokenAutor, string ticketId, string avaliacao)
         {
             //verifico login.

@@ -144,7 +144,7 @@ namespace ApiForum.Controllers
         /// <param name="TicketID"></param>
         /// <returns>Retorno uma mensagem de Status para o Cliente.</returns>
         [HttpPost("Fechar")]
-        public async Task<IActionResult> FecharTicket(string autorToken, string TicketID)
+        public async Task<IActionResult> FecharTicket([FromHeader]string autorToken,[FromBody] string TicketID)
         {
             var Core = new TicketCore(_contexto);
             var result = await Core.FecharTicket(autorToken, TicketID);
