@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Model.Views.Receber;
+
 
 namespace Core
 {
@@ -253,49 +255,20 @@ namespace Core
             return new Retorno { Status = true, Resultado = new List<string> { $"{atendente.Nome} você atribuiu esse Ticket a sua base." } };
         }
 
-        public async Task<Retorno> AvaliarTicket(string tokenAutor, string ticketId, string avaliacao)
-        {
-            //verifico login.
-            if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
-
-            if (int.TryParse(avaliacao, out int num) || num < 1 || num > 4)
-                return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
-
-            //verifico se o Ticket ID é valido.
-            if (!Guid.TryParse(ticketId, out Guid tId))
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado!" } };
-
-            // vejo se a avaliacao é valida
-            int.TryParse(avaliacao, out int avaliacao1);
-            if (!Enum.IsDefined(typeof(Avaliacao), avaliacao1) || avaliacao1 == 0)
-                return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
-
-            // busco pelo ticket e faço a validação de o ticket precisar estar fechado
-            var Oticket = await _serviceContext.Tickets.SingleOrDefaultAsync(c => c.Id == Guid.Parse(ticketId) && c.ClienteId == Guid.Parse(tokenAutor));
-
-            if (Oticket.AtendenteId == null)
-                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel avaliar um ticket que nao foi atendido" } };
-
-            if (Oticket.Status != Status.FECHADO)
-                return new Retorno { Status = false, Resultado = new List<string> { "O ticket precisa estar fechado para ocorrer a avaliação" } };
-            
-            Oticket.Avaliacao = Enum.Parse<Avaliacao>(avaliacao);
-
-            await _serviceContext.SaveChangesAsync();
-
-            return new Retorno { Status = true, Resultado = new List<string> { "Avaliação registrada com sucesso!" } };
-        }
         // metódo para realizar o fechamento do ticket
-        public async Task<Retorno> FecharTicket(string tokenAutor, string ticketId)
+        public async Task<Retorno> FecharTicket(string tokenAutor, AvaliacaoView Fechamento)
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             // verifico se o guid o ticket é valido
-            if (!Guid.TryParse(ticketId, out Guid result))
+            if (!Guid.TryParse(Fechamento.TicketId, out Guid result))
                 return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
+
+            int.TryParse(Fechamento.Avaliacao, out int avaliacao1);
+            if (!Enum.IsDefined(typeof(Avaliacao), avaliacao1) || avaliacao1 == 0)
+                return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
 
             // busco e valido se este ticket em especifico é valido.
             var oTicket = await _serviceContext.Tickets.SingleOrDefaultAsync(c => c.Id == result && c.ClienteId == Guid.Parse(tokenAutor));
@@ -314,6 +287,7 @@ namespace Core
 
             // atribuo e fecho o ticket
             oTicket.Status = Status.FECHADO;
+            oTicket.Avaliacao =Enum.Parse<Avaliacao>(Fechamento.Avaliacao);
 
             await _serviceContext.SaveChangesAsync();
 

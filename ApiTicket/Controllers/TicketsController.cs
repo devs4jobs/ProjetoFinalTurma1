@@ -3,6 +3,7 @@ using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
 using System.Threading.Tasks;
+using Model.Views.Receber;
 
 namespace ApiForum.Controllers
 {
@@ -123,31 +124,16 @@ namespace ApiForum.Controllers
         }
 
         /// <summary>
-        /// O Cliente Avalia o Atendente.
-        /// </summary>
-        /// <param name="autorToken"></param>
-        /// <param name="TicketID"></param>
-        /// <param name="avaliacao"></param>
-        /// <returns>Retorna mensagem de Status da Avaliação.</returns>
-        [HttpPost("Avaliar/{TicketID}/{avaliacao}")]
-        public async Task<IActionResult> Avaliar([FromHeader]string autorToken, string TicketID, string avaliacao)
-        {
-            var Core = new TicketCore(_contexto);
-            var result = await  Core.AvaliarTicket(autorToken, TicketID, avaliacao);
-            return result.Status ? Ok(result) : Ok(result);
-        }
-
-        /// <summary>
         /// Cliente fecha o Ticket.
         /// </summary>
         /// <param name="autorToken"></param>
-        /// <param name="TicketID"></param>
+        /// <param name="Avaliacao"></param>
         /// <returns>Retorno uma mensagem de Status para o Cliente.</returns>
         [HttpPost("Fechar")]
-        public async Task<IActionResult> FecharTicket([FromHeader]string autorToken,[FromBody] string TicketID)
+        public async Task<IActionResult> FecharTicket([FromHeader]string autorToken,[FromBody] AvaliacaoView Avaliacao)
         {
             var Core = new TicketCore(_contexto);
-            var result = await Core.FecharTicket(autorToken, TicketID);
+            var result = await Core.FecharTicket(autorToken, Avaliacao);
             return result.Status ? Ok(result) : Ok(result);
         }
 
