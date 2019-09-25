@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 namespace Core
 {
     public class RespostaCore : AbstractValidator<Resposta>
@@ -94,7 +93,7 @@ namespace Core
 
             // verifico se o guid o ticket é valido
             if (!Guid.TryParse(RespostaId, out Guid result))
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             var umaResposta =  await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
 
@@ -123,7 +122,7 @@ namespace Core
 
             // verifico se o guid o ticket é valido
             if (!Guid.TryParse(RespostaId, out Guid result))
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             var umaResposta = await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
             if (umaResposta == null)
