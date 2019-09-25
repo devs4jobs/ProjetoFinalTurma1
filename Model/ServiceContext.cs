@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
-
 namespace Model
 {
     public class ServiceContext : DbContext
@@ -14,6 +13,7 @@ namespace Model
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+
             foreach (var Tipo in ChangeTracker.Entries<Usuario>())
                 if (Tipo.State == EntityState.Modified || Tipo.State == EntityState.Added)
                 {
@@ -35,6 +35,5 @@ namespace Model
 
             return base.SaveChangesAsync(cancellationToken);
         }
-
     }
 }
