@@ -315,7 +315,7 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido." } };
 
             int.TryParse(Fechamento.Avaliacao, out int avaliacao1);
-            if (!Enum.IsDefined(typeof(Avaliacao), avaliacao1) || avaliacao1 == 0)
+            if (!Enum.IsDefined(typeof(Avaliacao), avaliacao1))
                 return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
 
             // busco e valido se este ticket em especifico é valido.

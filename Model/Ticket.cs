@@ -23,12 +23,10 @@ namespace Model
         public string Mensagem { get; set; }
 
         public Usuario Cliente { get; set; }
-
         [ForeignKey("Usuarios")]
         public Guid ClienteId { get; set; }
 
         public Usuario Atendente { get; set; }
-
         [ForeignKey("Usuarios")]
         public Guid? AtendenteId { get; set; }
 
