@@ -107,7 +107,7 @@ namespace Core
             if (umaResposta.Mensagem.Length < 10)
                 return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
 
-           await _serviceContext.SaveChangesAsync();
+            await _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(umaResposta) };
         }
