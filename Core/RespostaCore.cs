@@ -68,28 +68,7 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = new List<string> { "Reposta enviada com sucesso!" } };
         }
-        
-        /// <summary>
-        /// Método para buscar todas as respostas daquele ticket em especificio 
-        /// </summary>
-        /// <param name="tokenAutor"></param>
-        /// <param name="ticketId"></param>
-        public async Task<Retorno> BuscarRespostas(string tokenAutor, string ticketId)
-        {
-            // realizo as validacoes  do usuario e em seguida do ticket
-            if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
-
-            // verifico se o guid o ticket é valido
-            if (!Guid.TryParse(ticketId, out Guid result))
-                return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido" } };
-
-            // busco por todas as respotas e faço o teste se esse ticket tem respostas
-            var todasRespostas = await _serviceContext.Respostas.Where(r => r.Id == result).ToListAsync();
-
-            return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = _mapper.Map<List<RespostaRetorno>>(todasRespostas.OrderByDescending(c => c.DataCadastro)) };
-        }
-
+    
         /// <summary>
         ///  Método para realizar a edição das respostas
         /// </summary>

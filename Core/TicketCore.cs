@@ -25,7 +25,6 @@ namespace Core
             _mapper = mapper;
             _serviceContext = serviceContext;
         }
-
         public TicketCore(TicketView ticket, ServiceContext serviceContext, IMapper mapper)
         {
             _mapper = mapper;
@@ -140,14 +139,12 @@ namespace Core
         /// <param name="NumeroTicketQueVem"></param>
         public async Task<Retorno> BuscarTicketporNumeroDoTicket(string Usertoken, string NumeroTicketQueVem)
         {
-            //verifico login.
+
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
 
             if (!long.TryParse(NumeroTicketQueVem, out long numeroticket))
                 return new Retorno { Status = false, Resultado = new List<string> { "Número do ticket incorreto!" } };
-
-            //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
 
             var TicketSolicitado = await _serviceContext.Tickets.Include(c => c.LstRespostas).SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == Guid.Parse(Usertoken) || t.NumeroTicket == numeroticket && t.AtendenteId == Guid.Parse(Usertoken));
 
@@ -188,7 +185,7 @@ namespace Core
             {
                 List<Ticket> ticketsAtendente;
 
-                // busco pelos tickets daquele especifico usuario 
+                // busca uma lsita de tickets baseando no status 
                 switch (StatusAtual.ToUpper())
                 {
                     case "CONCLUIDO":
@@ -231,8 +228,9 @@ namespace Core
 
             // busco pelos tickets daquele especifico usuario 
 
-            List<Ticket> ticketsCliente = new List<Ticket>();
+            List<Ticket> ticketsCliente;
 
+            // busca uma lsita de tickets baseando no status
             switch (StatusAtual.ToUpper())
             {
                 case "ABERTO":
@@ -285,9 +283,13 @@ namespace Core
             var atendente = await _serviceContext.Usuarios.SingleOrDefaultAsync(u => u.Id == Guid.Parse(Usertoken) && u.Tipo == "ATENDENTE");
             if (atendente == null) return new Retorno { Status = false, Resultado = new List<string> { "Atendente não identificado!" } };
 
-            //verifico se o ticket solicitado existe na base de dados.
+            //busco e verifico se o ticket solicitado existe na base de dados.
 
             var TicketSolicitado = await _serviceContext.Tickets.SingleOrDefaultAsync(t => t.NumeroTicket == numeroDoTicket);
+
+            if (TicketSolicitado == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido" } };
+
             if (TicketSolicitado.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "ticket já tem um atendente." } };
 
             //passo o valor para o ticket
@@ -340,7 +342,7 @@ namespace Core
             return new Retorno { Status = true, Resultado = new List<string> { "ticket fechado com sucesso!" } };
         }
         /// <summary>
-        /// metodo para fazer uma identificação unica de cada usuário.
+        /// metodo para criar uma identificação unica de cada usuário.
         /// </summary>
         /// <returns></returns>
         public long ConvertNumeroTickets()

@@ -24,7 +24,7 @@ namespace Model
 
         public Usuario Cliente { get; set; }
         [ForeignKey("Usuarios")]
-        public Guid ClienteId { get; set; }
+        public Guid? ClienteId { get; set; }
 
         public Usuario Atendente { get; set; }
         [ForeignKey("Usuarios")]
