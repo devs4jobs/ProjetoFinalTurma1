@@ -30,7 +30,6 @@ namespace Model
 
         [JsonIgnore]
         [ForeignKey("Usuarios")]
-
         public Guid? ClienteId { get; set; }
         public Usuario Atendente { get; set; }
 
