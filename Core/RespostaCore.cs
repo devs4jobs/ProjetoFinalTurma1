@@ -25,8 +25,8 @@ namespace Core
             _serviceContext = ServiceContext;
             _resposta = _mapper.Map<Resposta>(RespostaQueVem);
 
-            RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
-            RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
+            RuleFor(e => e.Mensagem).NotNull().MinimumLength(2).WithMessage("O tamanho da mensagem deve ser de no minimo 2 caracteres");
+            RuleFor(e => e.TicketId).NotNull().WithMessage("O ticket Id não pode ser nulo!");
         }
 
         //Método para o cadastro de respostas
@@ -45,15 +45,15 @@ namespace Core
 
             var Ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(x => x.Id == _resposta.TicketId);
             if (Ticket == null)
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "ticket não existe" } };
 
             if(Ticket.Status == Status.FECHADO)
-                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel responder um ticket fechado!" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Não é possível responder um ticket fechado!" } };
 
             _resposta.UsuarioId = Guid.Parse(tokenAutor);
 
             if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
-                return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Usuário não está vinculado a esse ticket" } };
 
             // defino o status da resposta baseando se na pessoa que esta enviando 
             _resposta.Usuario = await _serviceContext.Usuarios.SingleOrDefaultAsync(x => x.Id == _resposta.UsuarioId);
@@ -76,7 +76,7 @@ namespace Core
 
             // verifico se o guid o ticket é valido
             if (!Guid.TryParse(ticketId, out Guid result))
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido" } };
 
             // busco por todas as respotas e faço o teste se esse ticket tem respostas
             var todasRespostas = await _serviceContext.Respostas.Where(r => r.Id == result).ToListAsync();
