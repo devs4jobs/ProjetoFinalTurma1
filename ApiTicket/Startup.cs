@@ -42,7 +42,7 @@ namespace ApiTicket
                     Contact = new Contact
                     {
                         Name = "1ª Turma Dev4Jobs",
-                        Url = "https://www.facebook.com/Dev4Jobs/"
+                        Url = "https://github.com/devs4jobs/ProjetoFinalTurma1/blob/master/Fluxograma%20API%20TicketOk.png"
                     }
                 });
                 
