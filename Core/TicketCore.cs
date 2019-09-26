@@ -85,8 +85,9 @@ namespace Core
 
             var ticketSelecionado = await _serviceContext.Tickets.SingleOrDefaultAsync(t => t.Id == tId);
 
-            if (ticketSelecionado.LstRespostas == null || ticketSelecionado.LstRespostas.Count() == 0)
-                return new Retorno { Status = false, Resultado = new List<string> { "Como o ticket já contém respostas. não é mais possível atualizá-lo" } };
+
+            if (ticketSelecionado.LstRespostas != null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Como o ticket já contem respostas. não é mais possivel atualiza-lo" } };
 
             //vejo se o cliente que ta longado é o mesmo que está Atualizando o ticket.
             if (ticketSelecionado.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuário não é o mesmo que postou o ticket!" } };
@@ -110,20 +111,22 @@ namespace Core
 
             _ticket = await _serviceContext.Tickets.Include(c => c.LstRespostas).SingleOrDefaultAsync(t => t.Id == tId);
 
-
             //vejo se o cliente que ta logado é o mesmo que está públicou o ticket.
             if (Guid.Parse(Usertoken) != _ticket.ClienteId) return new Retorno { Status = false, Resultado = new List<string> { "Usuário não pode deletar esse ticket, pois não é quem postou o mesmo!" } };
 
             //tento excluir o ticket e salvar as  alterações.
 
-            if (_ticket.LstRespostas.Count() > 0)
-                return new Retorno { Status = false, Resultado = new List<string> { "Não é possível remover este ticket, pois ele já tem respostas!" } };
+            if (_ticket.LstRespostas != null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel remover este ticket, pois ele ja tem respostas!" } };
+
 
             _serviceContext.Tickets.Remove(_ticket);
             await _serviceContext.SaveChangesAsync();
 
 
+
             return new Retorno { Status = true, Resultado = new List<string> { $"{_ticket.Cliente.Nome.ToLower()} seu ticket foi deletado com Sucesso!" } };
+
         }
         public async Task<Retorno> BuscarTicketporNumeroDoTicket(string Usertoken, string NumeroTicketQueVem)
         {
@@ -134,12 +137,12 @@ namespace Core
             if (!long.TryParse(NumeroTicketQueVem, out long numeroticket))
                 return new Retorno { Status = false, Resultado = new List<string> { "Número do ticket incorreto!" } };
 
-            var cliente = await _serviceContext.Usuarios.SingleOrDefaultAsync(u => u.Id == Guid.Parse(Usertoken));
-            if (cliente == null) return new Retorno { Status = false, Resultado = new List<string> { "Cliente não identificado!" } };
-
             //vejo se o cliente que ta longado é o mesmo que está públicando o ticket .
 
-            var TicketSolicitado = await _serviceContext.Tickets.Include(c => c.LstRespostas).SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == cliente.Id || t.NumeroTicket == numeroticket && t.AtendenteId == cliente.Id);
+            var TicketSolicitado = await _serviceContext.Tickets.Include(c => c.LstRespostas).SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == Guid.Parse(Usertoken) || t.NumeroTicket == numeroticket && t.AtendenteId == Guid.Parse(Usertoken));
+
+            if (TicketSolicitado == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Numero do Ticket passado, não esta Vinculado a você" } };
 
             TicketSolicitado.LstRespostas = await _serviceContext.Respostas.Include(c=>c.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).OrderBy(e => e.DataCadastro).ToListAsync();
 
@@ -292,9 +295,6 @@ namespace Core
             if (oTicket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido." } };
 
-            if (oTicket.ClienteId != Guid.Parse(tokenAutor))
-                return new Retorno { Status = false, Resultado = new List<string> { "Somente clientes podem fechar seus tickets!" } };
-
             if (oTicket.Status == Status.FECHADO)
                 return new Retorno { Status = false, Resultado = new List<string> { "Este ticket já foi fechado!" } };
 
@@ -321,8 +321,8 @@ namespace Core
 
             var UltimaResposta = await _serviceContext.Respostas.Include(c => c.Usuario).Where(c => c.TicketId == _serviceContext.Tickets.FirstOrDefault(d => d.NumeroTicket == Result).Id).OrderBy(c => c.DataCadastro).LastAsync();
 
-            if (UltimaResposta.Usuario.Tipo == "ATENDENTE" || (UltimaResposta.Usuario.Tipo == "CLIENTE" && UltimaResposta.DataCadastro.AddDays(14) < DateTime.Now))
-                return new Retorno { Status = false, Resultado = new List<string> { "Última Mensagem é do atendente ou Última Mensagem do cliente foi em menos de 14 dias." } };
+            if (UltimaResposta.Usuario.Tipo == "ATENDENTE" || (UltimaResposta.Usuario.Tipo == "CLIENTE" && UltimaResposta.DataCadastro.AddDays(7) < DateTime.Now))
+                return new Retorno { Status = false, Resultado = new List<string> { "Ultima Mensagem é do atendente ou Ultima Mensagem do cliente foi em menos de 7 dias" } };
 
             var Ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(c => c.Id == UltimaResposta.TicketId);
 
