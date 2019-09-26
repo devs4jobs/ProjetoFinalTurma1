@@ -305,6 +305,8 @@ namespace Core
             oTicket.Status = Status.FECHADO;
             oTicket.Avaliacao =Enum.Parse<Avaliacao>(Fechamento.Avaliacao);
 
+            MediaAtendente(tokenAutor);
+
             await _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { "ticket fechado com sucesso!" } };
@@ -343,6 +345,22 @@ namespace Core
                 return long.Parse(dataString + number.ToString().Substring(6));
             }
             catch (Exception) { return long.Parse(dataString + (1).ToString("D6")); }
+        }
+
+        public void MediaAtendente(string tokenAutor)
+        {
+            var atendenteId = _serviceContext.Usuarios.FirstOrDefault(r => r.Id == Guid.Parse(tokenAutor));
+
+            if (atendenteId.Tipo == "ATENDENTE")
+            {
+                var lista = _serviceContext.Tickets.Where(q => q.AtendenteId == atendenteId.Id);
+                List<dynamic> votos = new List<dynamic>();
+                foreach (var ticket in lista)
+                {
+                    votos.Add(ticket.Avaliacao);
+                    double mediaDosVotos = votos.Average(c => c.media);
+                }
+            }
         }
     }
 }
