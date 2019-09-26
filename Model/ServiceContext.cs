@@ -22,17 +22,6 @@ namespace Model
                     Tipo.Entity.Email = Tipo.Entity.Email.ToUpper();
                 }
 
-            foreach (var Tipo2 in ChangeTracker.Entries<Ticket>())
-                if (Tipo2.State == EntityState.Modified || Tipo2.State == EntityState.Added)
-                {
-                    Tipo2.Entity.Titulo = Tipo2.Entity.Titulo.ToUpper();
-                    Tipo2.Entity.Mensagem = Tipo2.Entity.Mensagem.ToUpper();
-                }
-
-            foreach (var Tipo3 in ChangeTracker.Entries<Resposta>())
-                if (Tipo3.State == EntityState.Modified || Tipo3.State == EntityState.Added)
-                    Tipo3.Entity.Mensagem = Tipo3.Entity.Mensagem.ToUpper();
-
             return base.SaveChangesAsync(cancellationToken);
         }
     }

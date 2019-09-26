@@ -17,29 +17,22 @@ namespace Model
         */
 
         public long NumeroTicket { get; set; }
-        public Status? Status { get; set; } = Model.Status.ABERTO;
+        public Status Status { get; set; } = Status.ABERTO;
 
-        [Required]
-        [MinLength(5)]
         public string Titulo { get; set; }
+        public string Mensagem { get; set; }
 
-        [Required]
-        [MinLength(10)]
-        public string Mensagem { get; set; } 
         public Usuario Cliente { get; set; }
 
-        [JsonIgnore]
         [ForeignKey("Usuarios")]
+        public Guid ClienteId { get; set; }
 
-        public Guid? ClienteId { get; set; }
         public Usuario Atendente { get; set; }
 
-        [JsonIgnore]
         [ForeignKey("Usuarios")]
         public Guid? AtendenteId { get; set; }
 
         public List<Resposta> LstRespostas { get; set; }
-        public Avaliacao? Avaliacao { get; set; } = Model.Avaliacao.NAO_AVALIADO;
+        public Avaliacao Avaliacao { get; set; } = Avaliacao.NAO_AVALIADO;
     }
 }
- 
