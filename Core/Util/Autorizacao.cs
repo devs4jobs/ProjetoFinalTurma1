@@ -14,5 +14,10 @@ namespace Core.Util
 
             return true;
         }
+
+        //public static bool ValidaTicket(string TicketId)
+        //{
+
+        //}
     }
 }
