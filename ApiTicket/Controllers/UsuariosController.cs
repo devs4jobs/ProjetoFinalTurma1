@@ -2,7 +2,12 @@
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System;
+using Core.Util;
+using System.Collections.Generic;
 
 namespace ApiForum.Controllers
 {
@@ -13,10 +18,9 @@ namespace ApiForum.Controllers
     {
         //Construtor contendo o contexto.
         private ServiceContext _contexto { get; set; }
-        private readonly IMapper _mapper;
 
         // construtor para a utilização do automapper por meio de injeçao de dependecia
-        public UsuariosController(ServiceContext service, IMapper mapper) { _contexto = service; _mapper = mapper; }
+        public UsuariosController(ServiceContext service )=> _contexto = service;
 
         /// <summary>
         /// Criar Usuário.
@@ -36,12 +40,20 @@ namespace ApiForum.Controllers
         /// <param name="usuarioView"></param>
         ///  /// <returns>Retorna o Status de cadastro</returns>
         [HttpPost]
-        public async Task<IActionResult> Cadastro([FromBody] UsuarioView usuarioView)
+        public async Task<IActionResult> Cadastro([FromBody] JObject usuarioView)
         {
-            var Core = new UsuarioCore(usuarioView, _contexto, _mapper);
-            var result = await Core.CadastrarUsuario();
+            try
+            {
+                var Core = new UsuarioCore(JsonConvert.DeserializeObject<Usuario>(JsonConvert.SerializeObject(usuarioView)), _contexto);
+                var result = await Core.CadastrarUsuario();
 
-            return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", result) : (IActionResult)Ok(result);
+                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", result) : (IActionResult)Ok(result);
+            }
+            catch (Exception)
+            {
+                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
+
+            }
         }
 
         /// <summary>
@@ -59,12 +71,20 @@ namespace ApiForum.Controllers
         /// <param name="loginView"></param>
         /// <returns>Retorna o AutorToken </returns>
         [HttpPost("Autenticar")]
-        public async Task<IActionResult> Logar([FromBody] LoginView loginView)
+        public async Task<IActionResult> Logar([FromBody] JObject loginView)
         {
-            var Core = new UsuarioCore(_contexto);
-            var result = await Core.LogarUsuario(loginView);
+            try
+            {
+                var Core = new UsuarioCore(_contexto);
+                var result = await Core.LogarUsuario(JsonConvert.DeserializeObject<Usuario>(JsonConvert.SerializeObject(loginView)));
 
-            return result.Status ? Ok(result) : Ok(result);
+                return result.Status ? Ok(result) : Ok(result);
+            }
+            catch (Exception)
+            {
+                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
+
+            }
         }
     }
 }

@@ -71,7 +71,11 @@ namespace ApiTicket
                 //mapeamento das respostas.
                 cfg.CreateMap<RespostaView, Resposta>();
                 cfg.CreateMap<Resposta, RespostaRetorno>();
-                cfg.CreateMap<RespostaUpdateView, Resposta>()
+                cfg.CreateMap<Resposta, Resposta>()
+                    .ForMember(d => d.DataCadastro, opt => opt.Ignore())
+                    .ForMember(d => d.Id, opt => opt.Ignore())
+                    .ForMember(d=>d.TicketId,opt=>opt.Ignore())
+                    .ForMember(d=>d.UsuarioId,opt=>opt.Ignore())
                     .ForMember(dest => dest.Mensagem, opt => opt.Condition(ori => ori.Mensagem != null));
             });
             IMapper mapper = config.CreateMapper();

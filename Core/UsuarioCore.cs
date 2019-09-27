@@ -12,23 +12,22 @@ namespace Core
     public class UsuarioCore : AbstractValidator<Usuario>
     {
         private Usuario _usuario { get; set; }
-        private IMapper _mapper { get; set; }
         public ServiceContext _dbcontext { get; set; }
 
         public UsuarioCore(ServiceContext Context) => _dbcontext = Context;
 
-        public UsuarioCore(UsuarioView Usuario, ServiceContext Context,IMapper mapper)
+        public UsuarioCore(Usuario Usuario, ServiceContext Context)
         {
-            _mapper = mapper;
             _dbcontext = Context;
-            _usuario = _mapper.Map<UsuarioView,Usuario>(Usuario);
+            _usuario = Usuario;
 
-            RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O Nome deve ter no minimo 3 letras!");
+            RuleFor(u => u.Nome).NotEmpty().WithMessage("Não há caracteres no nome");
+            RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O nome deve ter no miínimo 3 letras!");
             RuleFor(u => u.Email).EmailAddress().NotNull().WithMessage("Email inválido.");
-            RuleFor(u => u.Senha).NotNull().Length(8, 12).WithMessage("A senha deve ser entre 8 e 12 caracteres e nao pode ser nula");
+            RuleFor(u => u.Senha).NotNull().Length(8, 12).WithMessage("A senha deve ser entre 8 e 12 caracteres e não pode ser nula");
             RuleFor(u => u.Senha).Matches(@"[a-z-A-Z].\d|\d.[a-z-A-Z]").WithMessage("A senha deve conter ao menos uma letra e um número");
             RuleFor(u => u.ConfirmaSenha).Equal(_usuario.Senha).WithMessage("As senhas devem ser iguais!");
-            RuleFor(u => u.Tipo).NotNull().WithMessage("O tipo do Usuario deve ser informado");
+            RuleFor(u => u.Tipo).NotNull().WithMessage("O tipo do Usuário deve ser informado");
             if(_usuario.Tipo!=null) RuleFor(u => u.Tipo).Must(u => u.ToUpper() == "CLIENTE" || u.ToUpper() == "ATENDENTE").WithMessage("Tipo deve ser cliente ou atendente");
         }
 
@@ -44,7 +43,7 @@ namespace Core
 
             //Validacao pelo email e  a adição no db
             if (_dbcontext.Usuarios.Any(e => e.Email == _usuario.Email))
-                return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Email já cadastrado!" } };
 
             //  adciona e salva no banco de dados
            await _dbcontext.Usuarios.AddAsync(_usuario);
@@ -58,7 +57,7 @@ namespace Core
         /// </summary>
         /// <param name="loginView"></param>
         /// <returns></returns>
-        public async Task<Retorno> LogarUsuario(LoginView loginView)
+        public async Task<Retorno> LogarUsuario(Usuario loginView)
         {
             //Vejo se o login esta correto, se nao ja retorno uma mensagem.
             var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email && u.Senha == loginView.Senha);
