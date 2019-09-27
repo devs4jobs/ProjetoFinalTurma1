@@ -7,7 +7,6 @@ namespace Model
     public abstract class Base
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; private set; } = Guid.NewGuid();
         public DateTime DataCadastro { get; set; } = DateTime.Now;
     }

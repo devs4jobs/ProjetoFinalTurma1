@@ -136,19 +136,5 @@ namespace ApiForum.Controllers
             var result = await Core.FecharTicket(autorToken, Avaliacao);
             return result.Status ? Ok(result) : Ok(result);
         }
-
-        /// <summary>
-        /// Trocar o Atendente que está atendendo o Ticket.
-        /// </summary>
-        /// <param name="numeroTicket"></param>
-        /// <param name="autorToken"></param>
-        /// <returns>Retorno o Status da troca se foi ou não bem sucedida.</returns>
-        [HttpPost("TrocarAtendente/{numeroTicket}")]
-        public async Task<IActionResult> TrocarAtendente(string numeroTicket, [FromHeader]string autorToken)
-        {
-            var Core = new TicketCore(_contexto);
-            var result = await Core.TrocarAtendente(numeroTicket, autorToken);
-            return result.Status ? Ok(result) : Ok(result);
-        }
     }
 }

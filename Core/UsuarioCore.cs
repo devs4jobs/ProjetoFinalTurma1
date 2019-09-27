@@ -32,7 +32,10 @@ namespace Core
             if(_usuario.Tipo!=null) RuleFor(u => u.Tipo).Must(u => u.ToUpper() == "CLIENTE" || u.ToUpper() == "ATENDENTE").WithMessage("Tipo deve ser cliente ou atendente");
         }
 
-        //Método para cadastro de usuario
+       /// <summary>
+       /// Método para realizar o cadastro de um usuario
+       /// </summary>
+       /// <returns></returns>
         public async Task<Retorno> CadastrarUsuario()
         {
             var validar = Validate(_usuario);
@@ -43,14 +46,18 @@ namespace Core
             if (_dbcontext.Usuarios.Any(e => e.Email == _usuario.Email))
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
 
+            //  adciona e salva no banco de dados
            await _dbcontext.Usuarios.AddAsync(_usuario);
-
            await _dbcontext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { "Usuário cadastrado com sucesso!" } };
         }
 
-        //Método para logar o usuario na plataforma.
+        /// <summary>
+        /// Método para logar o usuario na plataforma.
+        /// </summary>
+        /// <param name="loginView"></param>
+        /// <returns></returns>
         public async Task<Retorno> LogarUsuario(LoginView loginView)
         {
             //Vejo se o login esta correto, se nao ja retorno uma mensagem.

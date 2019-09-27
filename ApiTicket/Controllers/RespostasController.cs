@@ -40,20 +40,6 @@ namespace ApiForum.Controllers
              var result = await Core.CadastrarResposta(autorToken);
             return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
         }
-
-        /// <summary>
-        ///  Busco a Resposta do Id Inserido.
-        /// </summary>
-        /// <param name="autorToken"></param>
-        /// <param name="RespostaID"></param>
-        /// <returns>Retorno a Resposta.</returns>
-        [HttpGet("{RespostaID}")]
-        public async Task<IActionResult> GetIdResposta([FromHeader]string autorToken, string RespostaID)
-        {
-            var Core = new RespostaCore(_contexto, _mapper);
-            var result = await  Core.BuscarRespostas(autorToken, RespostaID);
-            return result.Status ? Ok(result) : Ok(result);
-        }
         /// <summary>
         /// Atualizar a Resposta do Id inserido.
         /// </summary>
