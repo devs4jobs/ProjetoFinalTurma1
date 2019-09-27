@@ -2,6 +2,8 @@
 using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
 namespace ApiForum.Controllers

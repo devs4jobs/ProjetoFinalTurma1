@@ -217,7 +217,7 @@ namespace Core
                         Resultado = new List<string>
                     { "Não foi possível realizar a paginação" }
                     } : new Retorno
-                    { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsAtendente) };
+                    { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(listaPaginada) };
 
                 }
 
@@ -258,7 +258,7 @@ namespace Core
                 var listaPaginada = ticketsCliente.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
                 return listaPaginada.Count() == 0 ? new Retorno
                 { Status = false, Resultado = new List<string> { "Não foi possível realizar a paginação." } } :
-                new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsCliente) };
+                new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(listaPaginada) };
             }
             Paginacao.Paginar(1, 10, ticketsCliente.Count());
 

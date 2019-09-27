@@ -19,7 +19,7 @@ namespace Core
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
-        public RespostaCore(RespostaView RespostaQueVem, ServiceContext ServiceContext, IMapper mapper)
+        public RespostaCore(Resposta RespostaQueVem, ServiceContext ServiceContext, IMapper mapper)
         {
             _mapper = mapper;
             _serviceContext = ServiceContext;
