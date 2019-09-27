@@ -17,11 +17,10 @@ namespace Core
 
         public UsuarioCore(ServiceContext Context) => _dbcontext = Context;
 
-        public UsuarioCore(UsuarioView Usuario, ServiceContext Context,IMapper mapper)
+        public UsuarioCore(Usuario Usuario, ServiceContext Context)
         {
-            _mapper = mapper;
             _dbcontext = Context;
-            _usuario = _mapper.Map<UsuarioView,Usuario>(Usuario);
+            _usuario = Usuario;
 
             RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O Nome deve ter no minimo 3 letras!");
             RuleFor(u => u.Email).EmailAddress().NotNull().WithMessage("Email inválido.");
@@ -58,7 +57,7 @@ namespace Core
         /// </summary>
         /// <param name="loginView"></param>
         /// <returns></returns>
-        public async Task<Retorno> LogarUsuario(LoginView loginView)
+        public async Task<Retorno> LogarUsuario(Usuario loginView)
         {
             //Vejo se o login esta correto, se nao ja retorno uma mensagem.
             var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email && u.Senha == loginView.Senha);

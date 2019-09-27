@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Model;
 using System.Threading.Tasks;
 using Model.Views.Receber;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System;
+using Core.Util;
+using System.Collections.Generic;
 
 namespace ApiForum.Controllers
 {
@@ -35,11 +40,19 @@ namespace ApiForum.Controllers
         /// <param name="autorToken"></param>
         /// <returns>Retorna Status de cadastro do ticket</returns>
         [HttpPost]
-        public async Task<IActionResult> CadastrarTicket([FromBody] TicketView ticket, [FromHeader] string autorToken)
+        public async Task<IActionResult> CadastrarTicket([FromBody] JObject ticket, [FromHeader] string autorToken)
         {
-            var Core = new TicketCore(ticket, _contexto, _Mapper);
-            var result = await Core.CadastrarTicket(autorToken);
-            return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
+            try
+            {
+                var Core = new TicketCore(JsonConvert.DeserializeObject<Ticket>(JsonConvert.SerializeObject(ticket)), _contexto, _Mapper);
+                var result = await Core.CadastrarTicket(autorToken);
+                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
+            }
+            catch (Exception)
+            {
+                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
+
+            }
         }
 
         /// <summary>
@@ -63,7 +76,6 @@ namespace ApiForum.Controllers
         /// <returns>Retorna ticket que possui o Id inserido.</returns>
         [HttpGet("{NumeroTicket}")]
         public async Task<IActionResult> ProcurarTicketPorId([FromHeader]string autorToken, string NumeroTicket)
-
         {
             var Core = new TicketCore(_Mapper, _contexto);
             var result = await Core.BuscarTicketporNumeroDoTicket(autorToken, NumeroTicket);
@@ -102,11 +114,19 @@ namespace ApiForum.Controllers
         /// <param name="TicketID"></param>
         /// <param name="autorToken"></param>
         [HttpPut("{TicketID}")]
-        public async Task<IActionResult> AtualizarTicketId([FromHeader]string autorToken, string TicketID, [FromBody] TicketView ticket)
+        public async Task<IActionResult> AtualizarTicketId([FromHeader]string autorToken, string TicketID, [FromBody] JObject ticket)
         {
-            var Core = new TicketCore(_Mapper, _contexto);
-            var result = await Core.AtualizarTicket(autorToken, TicketID, ticket);
-            return result.Status ? Accepted(result) : (IActionResult)Ok(result);
+            try
+            {
+                var Core = new TicketCore(_Mapper, _contexto);
+                var result = await Core.AtualizarTicket(autorToken, TicketID, JsonConvert.DeserializeObject<Ticket>(JsonConvert.SerializeObject(ticket)));
+                return result.Status ? Accepted(result) : (IActionResult)Ok(result);
+            }
+            catch (Exception)
+            {
+                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
+
+            }
         }
 
         /// <summary>
@@ -130,8 +150,9 @@ namespace ApiForum.Controllers
         /// <param name="Avaliacao"></param>
         /// <returns>Retorno uma mensagem de Status para o Cliente.</returns>
         [HttpPost("Fechar")]
-        public async Task<IActionResult> FecharTicket([FromHeader]string autorToken,[FromBody] AvaliacaoView Avaliacao)
+        public async Task<IActionResult> FecharTicket([FromHeader]string autorToken, [FromBody] AvaliacaoView Avaliacao)
         {
+
             var Core = new TicketCore(_contexto);
             var result = await Core.FecharTicket(autorToken, Avaliacao);
             return result.Status ? Ok(result) : Ok(result);

@@ -25,10 +25,10 @@ namespace Core
             _mapper = mapper;
             _serviceContext = serviceContext;
         }
-        public TicketCore(TicketView ticket, ServiceContext serviceContext, IMapper mapper)
+        public TicketCore(Ticket ticket, ServiceContext serviceContext, IMapper mapper)
         {
             _mapper = mapper;
-            _ticket = _mapper.Map<TicketView, Ticket>(ticket);
+            _ticket = ticket;
             _serviceContext = serviceContext;
 
             RuleFor(t => t.Titulo).NotNull().MinimumLength(5).WithMessage("O título do ticket não pode ser nulo  mínimo de caracteres é 5");
@@ -71,7 +71,7 @@ namespace Core
         /// <param name="Usertoken"></param>
         /// <param name="TicketID"></param>
         /// <param name="ticketView"></param>
-        public async Task<Retorno> AtualizarTicket(string Usertoken, string TicketID, TicketView ticketView)
+        public async Task<Retorno> AtualizarTicket(string Usertoken, string TicketID, Ticket ticketView)
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
@@ -82,25 +82,26 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "ticket não identificado!" } };
 
             //busco pelo ticket e efetuo as validacoes
-            var ticketSelecionado = await _serviceContext.Tickets.Include(o => o.LstRespostas).SingleOrDefaultAsync(t => t.Id == tId);
+            _ticket = await _serviceContext.Tickets.Include(o => o.LstRespostas).SingleOrDefaultAsync(t => t.Id == tId);
 
-            if (ticketSelecionado == null)
+            if (_ticket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido!" } };
 
-            if (ticketSelecionado.LstRespostas != null)
+            if (_ticket.LstRespostas != null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Como o ticket já contem respostas. não é mais possivel atualiza-lo" } };
 
             //vejo se o cliente que ta longado é o mesmo que está Atualizando o ticket.
-            if (ticketSelecionado.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuário não é o mesmo que postou o ticket!" } };
+            if (_ticket.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuário não é o mesmo que postou o ticket!" } };
 
-            if (ticketSelecionado.Status == Status.FECHADO) return new Retorno { Status = false, Resultado = new List<string> { "Não se pode atualizar tickets já encerrados." } };
+            if (_ticket.Status == Status.FECHADO) return new Retorno { Status = false, Resultado = new List<string> { "Não se pode atualizar tickets já encerrados." } };
 
             // mapeando o retorno
-            _mapper.Map(ticketView, ticketSelecionado);
+            _mapper.Map(ticketView, _ticket);
             await _serviceContext.SaveChangesAsync();
 
-            return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(ticketSelecionado) };
+            return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(_ticket) };
         }
+
         /// <summary>
         /// /Método para deletar um ticket da base
         /// </summary>
@@ -132,6 +133,7 @@ namespace Core
 
             return new Retorno { Status = true, Resultado = new List<string> { $"{_ticket.Cliente.Nome.ToLower()} seu ticket foi deletado com Sucesso!" } };
         }
+
         /// <summary>
         /// Método para realizar a busca de um ticket pelo numero
         /// </summary>
@@ -264,6 +266,7 @@ namespace Core
 
             return _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10)).Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { $"Você não tem tickets {StatusAtual} no momento!" } } : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(ticketsCliente.Take(10)) };
         }
+
         /// <summary>
         /// Método para realizar a posse de um ticket com status aberto
         /// </summary>

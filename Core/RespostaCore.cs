@@ -19,11 +19,10 @@ namespace Core
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
-        public RespostaCore(Resposta RespostaQueVem, ServiceContext ServiceContext, IMapper mapper)
+        public RespostaCore(Resposta RespostaQueVem, ServiceContext ServiceContext)
         {
-            _mapper = mapper;
             _serviceContext = ServiceContext;
-            _resposta = _mapper.Map<Resposta>(RespostaQueVem);
+            _resposta = RespostaQueVem;
 
             RuleFor(e => e.Mensagem).NotNull().MinimumLength(2).WithMessage("O tamanho da mensagem deve ser de no minimo 2 caracteres");
             RuleFor(e => e.TicketId).NotNull().WithMessage("O ticket Id não pode ser nulo!");
@@ -75,7 +74,7 @@ namespace Core
         /// <param name="tokenAutor"></param>
         /// <param name="RespostaId"></param>
         /// <param name="respostaQueVem"></param>
-        public async Task<Retorno> EditarResposta(string tokenAutor, string RespostaId, RespostaUpdateView respostaQueVem)
+        public async Task<Retorno> EditarResposta(string tokenAutor, string RespostaId, Resposta respostaQueVem)
         {
             // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
@@ -97,7 +96,7 @@ namespace Core
             if (umaResposta.Mensagem.Length < 10)
                 return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
 
-
+            _mapper.Map(respostaQueVem, umaResposta);
 
             await _serviceContext.SaveChangesAsync();
 
