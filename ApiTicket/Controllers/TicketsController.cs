@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System;
 using Core.Util;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ApiForum.Controllers
 {
@@ -157,5 +158,24 @@ namespace ApiForum.Controllers
             var result = await Core.FecharTicket(autorToken, Avaliacao);
             return result.Status ? Ok(result) : Ok(result);
         }
+
+        [HttpGet("Lista")]
+        public IActionResult VoltarLista()
+        {
+
+            var lista = TimeZoneInfo.GetSystemTimeZones().Select(c => c.DisplayName); ;
+            return Ok(lista);
+        }
+
+
+
+        [HttpGet("Data")]
+        public IActionResult VoltarData()
+        {
+            var Data = DateTime.Now;
+
+            return Ok(Data);
+        }
+
     }
 }
