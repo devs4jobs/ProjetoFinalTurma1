@@ -19,19 +19,23 @@ namespace Core
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
-        public RespostaCore(RespostaView RespostaQueVem, ServiceContext ServiceContext, IMapper mapper)
+        public RespostaCore(Resposta RespostaQueVem, ServiceContext ServiceContext)
         {
-            _mapper = mapper;
             _serviceContext = ServiceContext;
-            _resposta = _mapper.Map<Resposta>(RespostaQueVem);
+            _resposta = RespostaQueVem;
 
-            RuleFor(e => e.Mensagem).NotEmpty().WithMessage("A mensagem não pode ser enviada sem conteúdo.");
-            RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
+
+            RuleFor(e => e.Mensagem).NotEmpty().WithMessage("A mensagem não pode ser enviada sem conteúdo.");           
+            RuleFor(e => e.Mensagem).NotNull().MinimumLength(2).WithMessage("O tamanho da mensagem deve ser de no minimo 2 caracteres");
             RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
+            
+
         }
 
-        //Método para o cadastro de respostas
-
+        /// <summary>
+        /// Método para o cadastro de respostas
+        /// </summary>
+        /// <param name="tokenAutor"></param>
         public async Task<Retorno> CadastrarResposta(string tokenAutor)
         {
             // o teste para a validacao do usuario
@@ -46,46 +50,35 @@ namespace Core
 
             var Ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(x => x.Id == _resposta.TicketId);
             if (Ticket == null)
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "ticket não existe" } };
 
             if(Ticket.Status == Status.FECHADO)
-                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel responder um ticket fechado!" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Não é possível responder um ticket fechado!" } };
 
             _resposta.UsuarioId = Guid.Parse(tokenAutor);
 
             if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
-                return new Retorno { Status = false, Resultado = new List<string> { "Usuario não esta vinculado a esse Ticket" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Usuário não está vinculado a esse ticket" } };
 
             // defino o status da resposta baseando se na pessoa que esta enviando 
             _resposta.Usuario = await _serviceContext.Usuarios.SingleOrDefaultAsync(x => x.Id == _resposta.UsuarioId);
             if (_resposta.Usuario.Tipo == "CLIENTE") Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
             else Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
 
+            //salvo e adciono no banco de dados
             await _serviceContext.AddAsync(_resposta);
-
             await _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { "Reposta enviada com sucesso!" } };
         }
-
-        //Método para buscar todas as respostas daquele ticket em especificio 
-        public async Task<Retorno> BuscarRespostas(string tokenAutor, string ticketId)
-        {
-            // realizo as validacoes  do usuario e em seguida do ticket
-            if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
-
-            // verifico se o guid o ticket é valido
-            if (!Guid.TryParse(ticketId, out Guid result))
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket inválido" } };
-
-            // busco por todas as respotas e faço o teste se esse ticket tem respostas
-            var todasRespostas = await _serviceContext.Respostas.Where(r => r.Id == result).ToListAsync();
-
-            return todasRespostas.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não há respostas nesse ticket" } } : new Retorno { Status = true, Resultado = _mapper.Map<List<RespostaRetorno>>(todasRespostas.OrderByDescending(c => c.DataCadastro)) };
-        }
-        // Método para realizar a edição das respostas
-        public async Task<Retorno> EditarResposta(string tokenAutor, string RespostaId, RespostaUpdateView respostaQueVem)
+    
+        /// <summary>
+        ///  Método para realizar a edição das respostas
+        /// </summary>
+        /// <param name="tokenAutor"></param>
+        /// <param name="RespostaId"></param>
+        /// <param name="respostaQueVem"></param>
+        public async Task<Retorno> EditarResposta(string tokenAutor, string RespostaId, Resposta respostaQueVem)
         {
             // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
@@ -95,6 +88,7 @@ namespace Core
             if (!Guid.TryParse(RespostaId, out Guid result))
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
+            // busco pela resposta e realiza as validações
             var umaResposta =  await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
 
             if (umaResposta == null)
@@ -103,17 +97,21 @@ namespace Core
             if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para editar negada, só o autor da resposta pode edita-la" } };
 
-            _mapper.Map(respostaQueVem, umaResposta);
-
             if (umaResposta.Mensagem.Length < 10)
                 return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
 
-           await _serviceContext.SaveChangesAsync();
+            _mapper.Map(respostaQueVem, umaResposta);
+
+            await _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(umaResposta) };
         }
 
-        //Método para deletar uma resposta
+        /// <summary>
+        /// Método para deletar uma resposta
+        /// </summary>
+        /// <param name="tokenAutor"></param>
+        /// <param name="RespostaId"></param>
         public async Task<Retorno> DeletarResposta(string tokenAutor, string RespostaId)
         {
             // realizo as validacoes  do usuario e em seguida do ticket
@@ -124,6 +122,7 @@ namespace Core
             if (!Guid.TryParse(RespostaId, out Guid result))
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
+            //procuro pela resposta em questao e aplico as validacoes
             var umaResposta = await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
             if (umaResposta == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
@@ -131,6 +130,7 @@ namespace Core
             if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para deletar negada, só o autor da resposta pode deletá-la" } };
 
+            //salvo a remoção 
             _serviceContext.Respostas.Remove(umaResposta);
            await _serviceContext.SaveChangesAsync();
 

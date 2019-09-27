@@ -17,11 +17,10 @@ namespace Core
 
         public UsuarioCore(ServiceContext Context) => _dbcontext = Context;
 
-        public UsuarioCore(UsuarioView Usuario, ServiceContext Context,IMapper mapper)
+        public UsuarioCore(Usuario Usuario, ServiceContext Context)
         {
-            _mapper = mapper;
             _dbcontext = Context;
-            _usuario = _mapper.Map<UsuarioView,Usuario>(Usuario);
+            _usuario = Usuario;
 
             RuleFor(u => u.Nome).NotEmpty().WithMessage("Não há caracteres no nome");
             RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O Nome deve ter no minimo 3 letras!");
@@ -33,7 +32,10 @@ namespace Core
             if(_usuario.Tipo!=null) RuleFor(u => u.Tipo).Must(u => u.ToUpper() == "CLIENTE" || u.ToUpper() == "ATENDENTE").WithMessage("Tipo deve ser cliente ou atendente");
         }
 
-        //Método para cadastro de usuario
+       /// <summary>
+       /// Método para realizar o cadastro de um usuario
+       /// </summary>
+       /// <returns></returns>
         public async Task<Retorno> CadastrarUsuario()
         {
             var validar = Validate(_usuario);
@@ -46,15 +48,19 @@ namespace Core
             if (_dbcontext.Usuarios.Any(e => e.Email == _usuario.Email))
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ja cadastrado!" } };
 
+            //  adciona e salva no banco de dados
            await _dbcontext.Usuarios.AddAsync(_usuario);
-
            await _dbcontext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { "Usuário cadastrado com sucesso!" } };
         }
 
-        //Método para logar o usuario na plataforma.
-        public async Task<Retorno> LogarUsuario(LoginView loginView)
+        /// <summary>
+        /// Método para logar o usuario na plataforma.
+        /// </summary>
+        /// <param name="loginView"></param>
+        /// <returns></returns>
+        public async Task<Retorno> LogarUsuario(Usuario loginView)
         {
             //Vejo se o login esta correto, se nao ja retorno uma mensagem.
             var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email && u.Senha == loginView.Senha);

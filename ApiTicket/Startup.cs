@@ -24,7 +24,7 @@ namespace ApiTicket
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddMvc().AddJsonOptions(options =>
             {
-                options.SerializerSettings.DateFormatString = "HH:mm,dd/MM/yyyy";
+                options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             });
 
@@ -42,7 +42,7 @@ namespace ApiTicket
                     Contact = new Contact
                     {
                         Name = "1ª Turma Dev4Jobs",
-                        Url = "https://www.facebook.com/Dev4Jobs/"
+                        Url = "https://github.com/devs4jobs/ProjetoFinalTurma1/blob/master/Fluxograma%20API%20TicketOk.png"
                     }
                 });
                 
@@ -71,7 +71,11 @@ namespace ApiTicket
                 //mapeamento das respostas.
                 cfg.CreateMap<RespostaView, Resposta>();
                 cfg.CreateMap<Resposta, RespostaRetorno>();
-                cfg.CreateMap<RespostaUpdateView, Resposta>()
+                cfg.CreateMap<Resposta, Resposta>()
+                    .ForMember(d => d.DataCadastro, opt => opt.Ignore())
+                    .ForMember(d => d.Id, opt => opt.Ignore())
+                    .ForMember(d=>d.TicketId,opt=>opt.Ignore())
+                    .ForMember(d=>d.UsuarioId,opt=>opt.Ignore())
                     .ForMember(dest => dest.Mensagem, opt => opt.Condition(ori => ori.Mensagem != null));
             });
             IMapper mapper = config.CreateMapper();
