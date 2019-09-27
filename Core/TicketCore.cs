@@ -31,8 +31,20 @@ namespace Core
             _ticket = ticket;
             _serviceContext = serviceContext;
 
-            RuleFor(t => t.Titulo).NotNull().MinimumLength(5).WithMessage("O título do ticket não pode ser nulo  mínimo de caracteres é 5");
-            RuleFor(t => t.Mensagem).NotNull().MinimumLength(5).WithMessage("A Mensagem do ticket não pode ser nula , deve haver uma descrição, e o mínimo de caracteres é 5");
+
+            RuleFor(w => w.Mensagem).NotEmpty().WithMessage("A mensagem não pode ser enviada sem conteúdo.");
+            RuleFor(w => w.Titulo).NotEmpty().WithMessage("O título não pode ser enviado sem conteúdo.");
+
+            RuleFor(t => t.Titulo).NotNull().MinimumLength(5)
+                .WithMessage("O título do ticket não pode ser nulo  minimo de caracteres é 5");
+
+            RuleFor(t => t.Mensagem).NotNull().MinimumLength(10)
+                .WithMessage("A Mensagem do ticket não pode ser nula , deve haver uma descrição, e o minimo de caracteres é 10");
+
+            RuleFor(t => t.Status).IsInEnum();
+
+            RuleFor(t => t.Avaliacao).IsInEnum();
+
         }
 
         /// <summary>
@@ -294,6 +306,7 @@ namespace Core
             if (_ticket.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "ticket já tem um atendente." } };
 
             //passo o valor para o ticket
+
             _ticket.AtendenteId = atendente.Id;
             _ticket.Status = Status.AGUARDANDO_RESPOSTA_DO_ATENDENTE;
 
@@ -337,6 +350,7 @@ namespace Core
             // atribuo e fecho o ticket
             _ticket.Status = Status.FECHADO;
             _ticket.Avaliacao = Enum.Parse<Avaliacao>(Fechamento.Avaliacao);
+
 
             await _serviceContext.SaveChangesAsync();
 

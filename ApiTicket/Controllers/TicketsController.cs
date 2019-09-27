@@ -124,7 +124,7 @@ namespace ApiForum.Controllers
             }
             catch (Exception)
             {
-                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
+                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger"} });
 
             }
         }

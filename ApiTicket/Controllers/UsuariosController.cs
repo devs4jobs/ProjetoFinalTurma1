@@ -18,10 +18,9 @@ namespace ApiForum.Controllers
     {
         //Construtor contendo o contexto.
         private ServiceContext _contexto { get; set; }
-        private readonly IMapper _mapper;
 
         // construtor para a utilização do automapper por meio de injeçao de dependecia
-        public UsuariosController(ServiceContext service, IMapper mapper) { _contexto = service; _mapper = mapper; }
+        public UsuariosController(ServiceContext service )=> _contexto = service;
 
         /// <summary>
         /// Criar Usuário.
@@ -50,9 +49,9 @@ namespace ApiForum.Controllers
 
                 return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", result) : (IActionResult)Ok(result);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
+                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger error {e.Message}" } });
 
             }
         }

@@ -19,13 +19,16 @@ namespace Core
 
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
+
         public RespostaCore(Resposta RespostaQueVem, ServiceContext ServiceContext)
+
         {
             _serviceContext = ServiceContext;
             _resposta = RespostaQueVem;
 
+            RuleFor(e => e.Mensagem).NotEmpty().WithMessage("A mensagem não pode ser enviada sem conteúdo.");           
             RuleFor(e => e.Mensagem).NotNull().MinimumLength(2).WithMessage("O tamanho da mensagem deve ser de no minimo 2 caracteres");
-            RuleFor(e => e.TicketId).NotNull().WithMessage("O ticket Id não pode ser nulo!");
+            RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
         }
 
         /// <summary>
