@@ -30,25 +30,25 @@ namespace Model.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     DataCadastro = table.Column<DateTime>(nullable: false),
                     NumeroTicket = table.Column<long>(nullable: false),
-                    ClientId = table.Column<Guid>(nullable: true),
-                    AtendentId = table.Column<Guid>(nullable: true),
-                    Status = table.Column<int>(nullable: true),
+                    Status = table.Column<int>(nullable: false),
                     Titulo = table.Column<string>(nullable: true),
                     Mensagem = table.Column<string>(nullable: true),
-                    Avaliacao = table.Column<int>(nullable: true)
+                    ClienteId = table.Column<Guid>(nullable: true),
+                    AtendenteId = table.Column<Guid>(nullable: true),
+                    Avaliacao = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tickets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tickets_Usuarios_AtendentId",
-                        column: x => x.AtendentId,
+                        name: "FK_Tickets_Usuarios_AtendenteId",
+                        column: x => x.AtendenteId,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Tickets_Usuarios_ClientId",
-                        column: x => x.ClientId,
+                        name: "FK_Tickets_Usuarios_ClienteId",
+                        column: x => x.ClienteId,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -87,14 +87,19 @@ namespace Model.Migrations
                 column: "TicketId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tickets_AtendentId",
-                table: "Tickets",
-                column: "AtendentId");
+                name: "IX_Respostas_UsuarioId",
+                table: "Respostas",
+                column: "UsuarioId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tickets_ClientId",
+                name: "IX_Tickets_AtendenteId",
                 table: "Tickets",
-                column: "ClientId");
+                column: "AtendenteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_ClienteId",
+                table: "Tickets",
+                column: "ClienteId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

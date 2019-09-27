@@ -148,16 +148,14 @@ namespace Core
             if (!long.TryParse(NumeroTicketQueVem, out long numeroticket))
                 return new Retorno { Status = false, Resultado = new List<string> { "Número do ticket incorreto!" } };
 
-            var TicketSolicitado = await _serviceContext.Tickets.Include(c => c.LstRespostas).SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == Guid.Parse(Usertoken) || t.NumeroTicket == numeroticket && t.AtendenteId == Guid.Parse(Usertoken));
+           _ticket = await _serviceContext.Tickets.Include(c => c.LstRespostas).SingleOrDefaultAsync(t => t.NumeroTicket == numeroticket && t.ClienteId == Guid.Parse(Usertoken) || t.NumeroTicket == numeroticket && t.AtendenteId == Guid.Parse(Usertoken));
 
-            if (TicketSolicitado == null)
+            if (_ticket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Numero do Ticket passado, não esta Vinculado a você" } };
 
-            TicketSolicitado.LstRespostas = await _serviceContext.Respostas.Include(c => c.Usuario).Where(c => c.TicketId == TicketSolicitado.Id).OrderBy(e => e.DataCadastro).ToListAsync();
+            _ticket.LstRespostas = await _serviceContext.Respostas.Include(c => c.Usuario).Where(c => c.TicketId == _ticket.Id).OrderBy(e => e.DataCadastro).ToListAsync();
 
-            var TicketRetorno = _mapper.Map<TicketRetorno>(TicketSolicitado);
-
-            return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(TicketSolicitado) };
+            return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(_ticket) };
         }
 
         /// <summary>
@@ -288,16 +286,16 @@ namespace Core
 
             //busco e verifico se o ticket solicitado existe na base de dados.
 
-            var TicketSolicitado = await _serviceContext.Tickets.SingleOrDefaultAsync(t => t.NumeroTicket == numeroDoTicket);
+            _ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(t => t.NumeroTicket == numeroDoTicket);
 
-            if (TicketSolicitado == null)
+            if (_ticket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido" } };
 
-            if (TicketSolicitado.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "ticket já tem um atendente." } };
+            if (_ticket.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "ticket já tem um atendente." } };
 
             //passo o valor para o ticket
-            TicketSolicitado.AtendenteId = atendente.Id;
-            TicketSolicitado.Status = Status.AGUARDANDO_RESPOSTA_DO_ATENDENTE;
+            _ticket.AtendenteId = atendente.Id;
+            _ticket.Status = Status.AGUARDANDO_RESPOSTA_DO_ATENDENTE;
 
             //Salvando 
             await _serviceContext.SaveChangesAsync();
@@ -324,21 +322,21 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
 
             // busco e valido se este ticket em especifico é valido.
-            var oTicket = await _serviceContext.Tickets.SingleOrDefaultAsync(c => c.Id == result && c.ClienteId == Guid.Parse(tokenAutor));
+             _ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(c => c.Id == result && c.ClienteId == Guid.Parse(tokenAutor));
 
             // validações para a reliazação do fechamento
-            if (oTicket == null)
+            if (_ticket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido." } };
 
-            if (oTicket.Status == Status.FECHADO)
+            if (_ticket.Status == Status.FECHADO)
                 return new Retorno { Status = false, Resultado = new List<string> { "Este ticket já foi fechado!" } };
 
-            if (oTicket.AtendenteId == null)
+            if (_ticket.AtendenteId == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Não é possível fechar um ticket que não foi atendido." } };
 
             // atribuo e fecho o ticket
-            oTicket.Status = Status.FECHADO;
-            oTicket.Avaliacao = Enum.Parse<Avaliacao>(Fechamento.Avaliacao);
+            _ticket.Status = Status.FECHADO;
+            _ticket.Avaliacao = Enum.Parse<Avaliacao>(Fechamento.Avaliacao);
 
             await _serviceContext.SaveChangesAsync();
 

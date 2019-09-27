@@ -10,6 +10,8 @@ using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
 using System.IO;
 using System;
+using Microsoft.Extensions.Options;
+
 namespace ApiTicket
 {
     public class Startup
@@ -22,6 +24,7 @@ namespace ApiTicket
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";

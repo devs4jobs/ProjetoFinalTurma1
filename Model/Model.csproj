@@ -5,13 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20190926191413_Quarto.cs" />
-    <Compile Remove="Migrations\20190926191413_Quarto.Designer.cs" />
-    <Compile Remove="Migrations\20190926192943_Quarta.cs" />
-    <Compile Remove="Migrations\20190926192943_Quarta.Designer.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.6" />

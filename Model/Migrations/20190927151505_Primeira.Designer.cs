@@ -10,8 +10,8 @@ using Model;
 namespace Model.Migrations
 {
     [DbContext(typeof(ServiceContext))]
-    [Migration("20190923135455_Segunda")]
-    partial class Segunda
+    [Migration("20190927151505_Primeira")]
+    partial class Primeira
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -38,6 +38,8 @@ namespace Model.Migrations
 
                     b.HasIndex("TicketId");
 
+                    b.HasIndex("UsuarioId");
+
                     b.ToTable("Respostas");
                 });
 
@@ -46,13 +48,9 @@ namespace Model.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid?>("AtendentId");
-
                     b.Property<Guid?>("AtendenteId");
 
-                    b.Property<int?>("Avaliacao");
-
-                    b.Property<Guid?>("ClientId");
+                    b.Property<int>("Avaliacao");
 
                     b.Property<Guid?>("ClienteId");
 
@@ -62,7 +60,7 @@ namespace Model.Migrations
 
                     b.Property<long>("NumeroTicket");
 
-                    b.Property<int?>("Status");
+                    b.Property<int>("Status");
 
                     b.Property<string>("Titulo");
 
@@ -100,6 +98,10 @@ namespace Model.Migrations
                     b.HasOne("Model.Ticket")
                         .WithMany("LstRespostas")
                         .HasForeignKey("TicketId");
+
+                    b.HasOne("Model.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId");
                 });
 
             modelBuilder.Entity("Model.Ticket", b =>

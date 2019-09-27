@@ -8,6 +8,6 @@ namespace Model
     {
         [Key]
         public Guid Id { get; private set; } = Guid.NewGuid();
-        public DateTime DataCadastro { get; set; } = DateTime.Now;
+        public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
     }
 }

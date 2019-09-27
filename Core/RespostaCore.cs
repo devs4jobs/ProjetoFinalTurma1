@@ -85,22 +85,22 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             // busco pela resposta e realiza as validações
-            var umaResposta =  await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
+            var _resposta =  await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
 
-            if (umaResposta == null)
+            if (_resposta == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
-            if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
+            if (_resposta.UsuarioId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para editar negada, só o autor da resposta pode edita-la" } };
 
-            if (umaResposta.Mensagem.Length < 10)
+            if (_resposta.Mensagem.Length < 10)
                 return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
 
-            _mapper.Map(respostaQueVem, umaResposta);
+            _mapper.Map(respostaQueVem, _resposta);
 
             await _serviceContext.SaveChangesAsync();
 
-            return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(umaResposta) };
+            return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(_resposta) };
         }
 
         /// <summary>
@@ -119,15 +119,15 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             //procuro pela resposta em questao e aplico as validacoes
-            var umaResposta = await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
-            if (umaResposta == null)
+            var _resposta = await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
+            if (_resposta == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
-            if (umaResposta.UsuarioId != Guid.Parse(tokenAutor))
+            if (_resposta.UsuarioId != Guid.Parse(tokenAutor))
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização para deletar negada, só o autor da resposta pode deletá-la" } };
 
             //salvo a remoção 
-            _serviceContext.Respostas.Remove(umaResposta);
+            _serviceContext.Respostas.Remove(_resposta);
            await _serviceContext.SaveChangesAsync();
 
             return new Retorno { Status = true, Resultado = new List<string> { "Resposta deletada com sucesso!" } };
