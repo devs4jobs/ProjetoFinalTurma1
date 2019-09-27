@@ -11,6 +11,7 @@ namespace Model
        public DbSet<Usuario> Usuarios { get; set; }
        public DbSet<Resposta> Respostas { get; set; }
 
+        // override do metodo de salvar para realizar o to upper em nas propriedades do usuario
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
 

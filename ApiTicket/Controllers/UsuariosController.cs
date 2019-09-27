@@ -49,11 +49,7 @@ namespace ApiForum.Controllers
 
                 return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", result) : (IActionResult)Ok(result);
             }
-            catch (Exception e)
-            {
-                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger error {e.Message}" } });
-
-            }
+            catch (Exception e) {  return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger error {e.Message}" } });}
         }
 
         /// <summary>
@@ -80,11 +76,7 @@ namespace ApiForum.Controllers
 
                 return result.Status ? Ok(result) : Ok(result);
             }
-            catch (Exception)
-            {
-                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
-
-            }
+            catch (Exception) {  return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } }); }
         }
     }
 }

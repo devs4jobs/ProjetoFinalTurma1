@@ -49,11 +49,7 @@ namespace ApiForum.Controllers
                 var result = await Core.CadastrarTicket(autorToken);
                 return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
             }
-            catch (Exception)
-            {
-                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
-
-            }
+            catch (Exception) { return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } }); }
         }
 
         /// <summary>
@@ -123,11 +119,7 @@ namespace ApiForum.Controllers
                 var result = await Core.AtualizarTicket(autorToken, TicketID, JsonConvert.DeserializeObject<Ticket>(JsonConvert.SerializeObject(ticket)));
                 return result.Status ? Accepted(result) : (IActionResult)Ok(result);
             }
-            catch (Exception)
-            {
-                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger"} });
-
-            }
+            catch (Exception){  return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger"} }); }
         }
 
         /// <summary>
@@ -158,24 +150,5 @@ namespace ApiForum.Controllers
             var result = await Core.FecharTicket(autorToken, Avaliacao);
             return result.Status ? Ok(result) : Ok(result);
         }
-
-        [HttpGet("Lista")]
-        public IActionResult VoltarLista()
-        {
-
-            var lista = TimeZoneInfo.GetSystemTimeZones().Select(c => c.DisplayName); ;
-            return Ok(lista);
-        }
-
-
-
-        [HttpGet("Data")]
-        public IActionResult VoltarData()
-        {
-            var Data = DateTime.Now;
-
-            return Ok(Data);
-        }
-
     }
 }
