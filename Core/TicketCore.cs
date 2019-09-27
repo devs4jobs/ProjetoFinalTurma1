@@ -25,8 +25,10 @@ namespace Core
         public TicketCore(ServiceContext serviceContext) => _serviceContext = serviceContext;
         public TicketCore(IMapper mapper, ServiceContext serviceContext)
         {
+
             _mapper = mapper;
             _serviceContext = serviceContext;
+
         }
 
 
@@ -35,6 +37,9 @@ namespace Core
             _mapper = mapper;
             _ticket = _mapper.Map<TicketView, Ticket>(ticket);
             _serviceContext = serviceContext;
+
+            RuleFor(w => w.Mensagem).NotEmpty().WithMessage("A mensagem não pode ser enviada sem conteúdo.");
+            RuleFor(w => w.Titulo).NotEmpty().WithMessage("O título não pode ser enviado sem conteúdo.");
 
             RuleFor(t => t.Titulo).NotNull().MinimumLength(5)
                 .WithMessage("O título do ticket não pode ser nulo  minimo de caracteres é 5");
@@ -266,6 +271,7 @@ namespace Core
             if (TicketSolicitado.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "Ticket já tem um atendente." } };
 
             //passo o valor para o ticket
+
             TicketSolicitado.AtendenteId = atendente.Id;
             TicketSolicitado.Status = Status.AGUARDANDO_RESPOSTA_DO_ATENDENTE;
 
@@ -305,9 +311,7 @@ namespace Core
 
             // atribuo e fecho o ticket
             oTicket.Status = Status.FECHADO;
-            oTicket.Avaliacao =Enum.Parse<Avaliacao>(Fechamento.Avaliacao);
-
-            MediaAtendente(tokenAutor);
+            oTicket.Avaliacao =Enum.Parse<Avaliacao>(Fechamento.Avaliacao);         
 
             await _serviceContext.SaveChangesAsync();
 
@@ -350,20 +354,6 @@ namespace Core
             catch (Exception) { return long.Parse(dataString + (1).ToString("D6")); }
         }
 
-        public void MediaAtendente(string tokenAutor)
-        {
-            var atendenteId = _serviceContext.Usuarios.FirstOrDefault(r => r.Id == Guid.Parse(tokenAutor));
-
-            if (atendenteId.Tipo == "ATENDENTE")
-            {
-                var lista = _serviceContext.Tickets.Where(q => q.AtendenteId == atendenteId.Id);
-                List<dynamic> votos = new List<dynamic>();
-                foreach (var ticket in lista)
-                {
-                    votos.Add(ticket.Avaliacao);
-                    double mediaDosVotos = votos.Average(c => c.media);
-                }
-            }
-        }
+        
     }
 }

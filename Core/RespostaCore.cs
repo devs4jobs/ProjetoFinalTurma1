@@ -25,6 +25,7 @@ namespace Core
             _serviceContext = ServiceContext;
             _resposta = _mapper.Map<Resposta>(RespostaQueVem);
 
+            RuleFor(e => e.Mensagem).NotEmpty().WithMessage("A mensagem não pode ser enviada sem conteúdo.");
             RuleFor(e => e.Mensagem).NotNull().MinimumLength(10).WithMessage("O tamanho da mensagem deve ser de no minimo 10 caracteres");
             RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
         }

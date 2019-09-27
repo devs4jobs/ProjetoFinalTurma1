@@ -23,6 +23,7 @@ namespace Core
             _dbcontext = Context;
             _usuario = _mapper.Map<UsuarioView,Usuario>(Usuario);
 
+            RuleFor(u => u.Nome).NotEmpty().WithMessage("Não há caracteres no nome");
             RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O Nome deve ter no minimo 3 letras!");
             RuleFor(u => u.Email).EmailAddress().NotNull().WithMessage("Email inválido.");
             RuleFor(u => u.Senha).NotNull().Length(8, 12).WithMessage("A senha deve ser entre 8 e 12 caracteres e nao pode ser nula");
@@ -38,6 +39,8 @@ namespace Core
             var validar = Validate(_usuario);
             if (!validar.IsValid)
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
+
+
 
             //Validacao pelo email e  a adição no db
             if (_dbcontext.Usuarios.Any(e => e.Email == _usuario.Email))
