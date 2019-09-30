@@ -58,12 +58,19 @@ namespace ApiTicket
             var config = new MapperConfiguration(cfg =>
             {
                 //mapeamento dos usuarios.
-                cfg.CreateMap<UsuarioView, Usuario>();
                 cfg.CreateMap<Usuario, UsuarioRetorno>();
-                cfg.CreateMap<LoginView, Usuario>();
 
                 //mapeamento dos tickets
-                cfg.CreateMap<TicketView, Ticket>()
+                cfg.CreateMap<Ticket, Ticket>()
+                    .ForMember(dest => dest.Atendente, opt => opt.Ignore())
+                    .ForMember(dest => dest.AtendenteId, opt => opt.Ignore())
+                    .ForMember(dest => dest.ClienteId, opt => opt.Ignore())
+                    .ForMember(dest => dest.Cliente, opt => opt.Ignore())
+                    .ForMember(dest => dest.DataCadastro, opt => opt.Ignore())
+                    .ForMember(dest => dest.Id, opt => opt.Ignore())
+                    .ForMember(dest => dest.LstRespostas, opt => opt.Ignore())
+                    .ForMember(dest => dest.NumeroTicket, opt => opt.Ignore())
+                    .ForMember(dest => dest.Status, opt => opt.Ignore())
                     .ForMember(dest => dest.Titulo, opt => opt.Condition(ori => ori.Titulo != null))
                     .ForMember(dest => dest.Mensagem, opt => opt.Condition(ori => ori.Mensagem != null));
 
@@ -72,7 +79,6 @@ namespace ApiTicket
                     .ForMember(dest => dest.Cliente, opt => opt.Condition(ori => ori.Cliente != null));
 
                 //mapeamento das respostas.
-                cfg.CreateMap<RespostaView, Resposta>();
                 cfg.CreateMap<Resposta, RespostaRetorno>();
                 cfg.CreateMap<Resposta, Resposta>()
                     .ForMember(d => d.DataCadastro, opt => opt.Ignore())

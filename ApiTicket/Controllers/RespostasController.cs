@@ -47,10 +47,7 @@ namespace ApiForum.Controllers
                var result = await Core.CadastrarResposta(autorToken);
                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
 
-            } catch(Exception){
-                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" }});
-
-            }
+            } catch(Exception){ return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" }});   }
         }
 
         /// <summary>
@@ -76,10 +73,8 @@ namespace ApiForum.Controllers
                 var Core = new RespostaCore(_contexto, _mapper);
                 var result = await Core.EditarResposta(autorToken, RespostaID, JsonConvert.DeserializeObject<Resposta>(JsonConvert.SerializeObject(resposta)));
                 return result.Status ? Accepted(result) : (IActionResult)Ok(result);
-            }catch(Exception)
-            {
-                return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });
-            }
+
+            }catch(Exception){  return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } }); }
         }
 
         /// <summary>
