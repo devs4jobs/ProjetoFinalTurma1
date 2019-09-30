@@ -60,9 +60,12 @@ namespace Core
         public async Task<Retorno> LogarUsuario(Usuario loginView)
         {
             //Vejo se o login esta correto, se nao ja retorno uma mensagem.
-            var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email && u.Senha == loginView.Senha);
+            var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email);
 
             if (usuarioLogin == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
+
+            if(usuarioLogin.Senha != loginView.Senha)
                 return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
 
             //  Crio o objeto a ser retornado 
