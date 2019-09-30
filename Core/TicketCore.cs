@@ -100,7 +100,7 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "ticket inválido!" } };
 
             if (_ticket.LstRespostas != null)
-                return new Retorno { Status = false, Resultado = new List<string> { "Como o ticket já contem respostas. não é mais possivel atualiza-lo" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Como o ticket já contem respostas. não é mais possível atualiza-lo" } };
 
             //vejo se o cliente que ta longado é o mesmo que está Atualizando o ticket.
             if (_ticket.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuário não é o mesmo que postou o ticket!" } };
@@ -137,7 +137,7 @@ namespace Core
             //tento excluir o ticket e salvar as  alterações.
 
             if (_ticket.LstRespostas != null)
-                return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel remover este ticket, pois ele ja tem respostas!" } };
+                return new Retorno { Status = false, Resultado = new List<string> { "Não é possível remover este ticket, pois ele ja tem respostas!" } };
 
             // Remoção do ticket
             _serviceContext.Tickets.Remove(_ticket);
