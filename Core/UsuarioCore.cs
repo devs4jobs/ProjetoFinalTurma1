@@ -1,12 +1,10 @@
-﻿using AutoMapper;
-using Core.Util;
+﻿using Core.Util;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 namespace Core
 {
     public class UsuarioCore : AbstractValidator<Usuario>

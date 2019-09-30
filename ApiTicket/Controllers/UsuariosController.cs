@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Core;
+﻿using Core;
 using Microsoft.AspNetCore.Mvc;
 using Model;
 using Newtonsoft.Json.Linq;
