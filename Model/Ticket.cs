@@ -27,5 +27,6 @@ namespace Model
 
         public List<Resposta> LstRespostas { get; set; }
         public Avaliacao Avaliacao { get; set; } = Avaliacao.NAO_AVALIADO;
+
     }
 }
