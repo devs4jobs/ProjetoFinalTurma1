@@ -43,7 +43,7 @@ namespace ApiForum.Controllers
         {
             try {
 
-               var Core = new RespostaCore(JsonConvert.DeserializeObject<Resposta>(JsonConvert.SerializeObject(resposta)), _contexto);
+               var Core = new RespostaCore(JsonConvert.DeserializeObject<Resposta>(resposta.ToString()), _contexto);
                var result = await Core.CadastrarResposta(autorToken);
                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
 
@@ -71,7 +71,7 @@ namespace ApiForum.Controllers
             try
             {
                 var Core = new RespostaCore(_contexto, _mapper);
-                var result = await Core.EditarResposta(autorToken, RespostaID, JsonConvert.DeserializeObject<Resposta>(JsonConvert.SerializeObject(resposta)));
+                var result = await Core.EditarResposta(autorToken, RespostaID, JsonConvert.DeserializeObject<Resposta>(resposta.ToString()));
                 return result.Status ? Accepted(result) : (IActionResult)Ok(result);
 
             }catch(Exception){  return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } }); }

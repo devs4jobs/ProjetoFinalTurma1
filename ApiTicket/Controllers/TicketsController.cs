@@ -9,7 +9,6 @@ using Newtonsoft.Json;
 using System;
 using Core.Util;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ApiForum.Controllers
 {
@@ -45,7 +44,7 @@ namespace ApiForum.Controllers
         {
             try
             {
-                var Core = new TicketCore(JsonConvert.DeserializeObject<Ticket>(JsonConvert.SerializeObject(ticket)), _contexto, _Mapper);
+                var Core = new TicketCore(JsonConvert.DeserializeObject<Ticket>(ticket.ToString()), _contexto, _Mapper);
                 var result = await Core.CadastrarTicket(autorToken);
                 return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
             }
@@ -116,7 +115,7 @@ namespace ApiForum.Controllers
             try
             {
                 var Core = new TicketCore(_Mapper, _contexto);
-                var result = await Core.AtualizarTicket(autorToken, TicketID, JsonConvert.DeserializeObject<Ticket>(JsonConvert.SerializeObject(ticket)));
+                var result = await Core.AtualizarTicket(autorToken, TicketID, JsonConvert.DeserializeObject<Ticket>(ticket.ToString()));
                 return result.Status ? Accepted(result) : (IActionResult)Ok(result);
             }
             catch (Exception){  return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger"} }); }
@@ -145,7 +144,6 @@ namespace ApiForum.Controllers
         [HttpPost("Fechar")]
         public async Task<IActionResult> FecharTicket([FromHeader]string autorToken, [FromBody] AvaliacaoView Avaliacao)
         {
-
             var Core = new TicketCore(_contexto);
             var result = await Core.FecharTicket(autorToken, Avaliacao);
             return result.Status ? Ok(result) : Ok(result);

@@ -10,7 +10,6 @@ namespace Core.Util
             if (!Guid.TryParse(Usertoken, out Guid token) || !serviceContext.Usuarios.Any(e => e.Id == token))
                 return false;
 
-
             return true;
         }
     }

@@ -14,9 +14,7 @@ namespace Core
         private Resposta _resposta { get; set; }
         private IMapper _mapper { get; set; }
         private ServiceContext _serviceContext { get; set; }
-
         public RespostaCore(ServiceContext ServiceContext, IMapper mapper) { _serviceContext = ServiceContext; _mapper = mapper; }
-
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
 
@@ -46,7 +44,6 @@ namespace Core
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
 
             // vejo se o ticket é valido
-
             var Ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(x => x.Id == _resposta.TicketId);
             if (Ticket == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "ticket não existe" } };
@@ -61,8 +58,7 @@ namespace Core
 
             // defino o status da resposta baseando se na pessoa que esta enviando 
             _resposta.Usuario = await _serviceContext.Usuarios.SingleOrDefaultAsync(x => x.Id == _resposta.UsuarioId);
-            if (_resposta.Usuario.Tipo == "CLIENTE") Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_ATENDENTE");
-            else Ticket.Status = Enum.Parse<Status>("AGUARDANDO_RESPOSTA_DO_CLIENTE");
+            Ticket.Status = _resposta.Usuario.Tipo == "CLIENTE" ? Status.AGUARDANDO_RESPOSTA_DO_ATENDENTE : Status.AGUARDANDO_RESPOSTA_DO_CLIENTE;
 
             //salvo e adciono no banco de dados
             await _serviceContext.AddAsync(_resposta);
@@ -88,7 +84,7 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
 
             // busco pela resposta e realiza as validações
-            var _resposta =  await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
+            _resposta =  await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == result);
 
             if (_resposta == null)
                 return new Retorno { Status = false, Resultado = new List<string> { "Resposta inválida" } };
