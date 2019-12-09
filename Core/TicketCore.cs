@@ -107,6 +107,7 @@ namespace Core
                 //busco pelo ticket e efetuo as validacoes
                 _ticket = await _serviceContext.Tickets.Include(o => o.LstRespostas).SingleAsync(t => t.Id == Guid.Parse(TicketID));
 
+
                 if (_ticket.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é o dono do ticket." } };
 
                 var Validate = this.Validate(_ticket, ruleSet: "Atualizar");
@@ -140,6 +141,7 @@ namespace Core
 
                 //vejo se o cliente que ta logado é o mesmo que está públicou o ticket.
                 if (Guid.Parse(Usertoken) != _ticket.ClienteId) return new Retorno { Status = false, Resultado = new List<string> { "Usuário não pode deletar esse ticket, pois não é quem postou o mesmo!" } };
+
 
                 //tento excluir o ticket e salvar as  alterações.
                 if (_ticket.LstRespostas != null) return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel remover este ticket, pois ele ja tem respostas!" } };

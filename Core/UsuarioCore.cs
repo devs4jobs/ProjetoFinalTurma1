@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Core.Util;
+﻿using Core.Util;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Model;
@@ -7,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 namespace Core
 {
     public class UsuarioCore : AbstractValidator<Usuario>
@@ -57,6 +55,7 @@ namespace Core
         /// <returns></returns>
         public async Task<Retorno> LogarUsuario(Usuario loginView)
         {
+<<<<<<< HEAD
             try 
             { 
                 //Vejo se o login esta correto, se nao ja retorno uma mensagem.
@@ -67,6 +66,19 @@ namespace Core
 
             }
             catch (Exception)
+=======
+            //Vejo se o login esta correto, se nao ja retorno uma mensagem.
+            var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email);
+
+            if (usuarioLogin == null)
+                return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
+
+            if(usuarioLogin.Senha != loginView.Senha)
+                return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
+
+            //  Crio o objeto a ser retornado 
+            var Resultado = new
+>>>>>>> ceae029ba58e88f09b2e6ec060f8de334b5a3411
             {
                 return new Retorno { Status = false, Resultado = new List<string> { "Email não encontrado!" } };
             }
