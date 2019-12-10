@@ -21,7 +21,11 @@ namespace ApiForum.Controllers
         private readonly IMapper _mapper;
 
         // construtor para a utilização do automapper por meio de injeçao de dependecia
-        public RespostasController(ServiceContext contexto, IMapper mapper) { _contexto = contexto; _mapper = mapper; }
+        public RespostasController(ServiceContext contexto, IMapper mapper) 
+        { 
+            _contexto = contexto; 
+            _mapper = mapper; 
+        }
 
         /// <summary>
         /// Criar Resposta

@@ -74,7 +74,7 @@ namespace ApiForum.Controllers
         public async Task<IActionResult> ProcurarTicketPorId([FromHeader]string autorToken, string NumeroTicket)
         {
             var Core = new TicketCore(_Mapper, _contexto);
-            var result = await Core.BuscarTicketporNumeroDoTicket(autorToken, NumeroTicket);
+            var result = await Core.BuscarTicketPorNumeroDoTicket(autorToken, NumeroTicket);
             return result.Status ? Ok(result) : Ok(result);
         }
 

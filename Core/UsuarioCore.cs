@@ -21,8 +21,8 @@ namespace Core
             _usuario = Usuario;
 
             RuleFor(u => u.Nome).NotEmpty().WithMessage("Não há caracteres no nome");
-            RuleFor(u => u.Nome).NotNull().MinimumLength(3).WithMessage("O nome deve ter no mínimo 3 letras!");
-            RuleFor(u => u.Email).EmailAddress().NotNull().WithMessage("Email inválido.");
+            RuleFor(u => u.Nome).NotNull().WithMessage("Nome deve ser informado").MinimumLength(3).WithMessage("O nome deve ter no mínimo 3 letras!");
+            RuleFor(u => u.Email).NotNull().EmailAddress().WithMessage("Email inválido.");
             RuleFor(u => u.Email).Must(x => !_dbcontext.Usuarios.Any(e => e.Email == x)).WithMessage("Email ja Cadastrado");
             RuleFor(u => u.Senha).NotNull().Length(8, 12).WithMessage("A senha deve ser entre 8 e 12 caracteres e não pode ser nula");
             RuleFor(u => u.Senha).Matches(@"[a-z-A-Z].\d|\d.[a-z-A-Z]").WithMessage("A senha deve conter ao menos uma letra e um número");
@@ -55,7 +55,6 @@ namespace Core
         /// <returns></returns>
         public async Task<Retorno> LogarUsuario(Usuario loginView)
         {
-<<<<<<< HEAD
             try 
             { 
                 //Vejo se o login esta correto, se nao ja retorno uma mensagem.
@@ -63,22 +62,8 @@ namespace Core
            
                 return _usuario.Senha != loginView.Senha?  new Retorno { Status = false, Resultado = new List<string> { "Senha inválida!" } }
                 : new Retorno { Status = true, Resultado = new { TokenUsuario = _usuario.Id, _usuario.Nome, _usuario.Tipo } };
-
             }
             catch (Exception)
-=======
-            //Vejo se o login esta correto, se nao ja retorno uma mensagem.
-            var usuarioLogin = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email);
-
-            if (usuarioLogin == null)
-                return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
-
-            if(usuarioLogin.Senha != loginView.Senha)
-                return new Retorno { Status = false, Resultado = new List<string> { "Email ou senha inválidos!" } };
-
-            //  Crio o objeto a ser retornado 
-            var Resultado = new
->>>>>>> ceae029ba58e88f09b2e6ec060f8de334b5a3411
             {
                 return new Retorno { Status = false, Resultado = new List<string> { "Email não encontrado!" } };
             }
