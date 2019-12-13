@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Model;
 
 namespace Model.Migrations
 {
     [DbContext(typeof(ServiceContext))]
-    partial class ServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20191212145320_Quinta")]
+    partial class Quinta
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,10 +37,6 @@ namespace Model.Migrations
                     b.Property<Guid?>("RespostaId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RespostaId")
-                        .IsUnique()
-                        .HasFilter("[RespostaId] IS NOT NULL");
 
                     b.ToTable("Anexos");
                 });
@@ -117,13 +115,6 @@ namespace Model.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Usuarios");
-                });
-
-            modelBuilder.Entity("Model.Anexo", b =>
-                {
-                    b.HasOne("Model.Resposta")
-                        .WithOne("Anexo")
-                        .HasForeignKey("Model.Anexo", "RespostaId");
                 });
 
             modelBuilder.Entity("Model.Resposta", b =>

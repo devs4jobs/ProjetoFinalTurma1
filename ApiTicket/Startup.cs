@@ -30,7 +30,6 @@ namespace ApiTicket
                 options.SerializerSettings.DateFormatString = "dd/MM/yyyy HH:mm:ss";
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             });
-
             services.AddDbContext<ServiceContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StringConexao")), ServiceLifetime.Scoped);
 
             services.AddSwaggerGen(opt =>
@@ -86,7 +85,10 @@ namespace ApiTicket
                     .ForMember(d=>d.TicketId,opt=>opt.Ignore())
                     .ForMember(d=>d.UsuarioId,opt=>opt.Ignore())
                     .ForMember(dest => dest.Mensagem, opt => opt.Condition(ori => ori.Mensagem != null));
-            });
+
+                cfg.CreateMap<Anexo, AnexoRetorno>();
+
+                });
             IMapper mapper = config.CreateMapper();
             services.AddSingleton(mapper);
         }

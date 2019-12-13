@@ -36,7 +36,13 @@ namespace ApiForum.Controllers
         /// 
         ///         {
         ///             "mensagem" : "Oi você pode me ajudar estou com problemas, Help!.",	
-        ///             "ticketId": "id do ticket em questão."
+        ///             "ticketId": "id do ticket em questão.",
+        ///             "anexo":{
+        ///                     
+        ///                     "nomeArquivo":"teste",
+        ///                     "extensao":"pdf",
+        ///                     "Arquivo":[bytes]
+        ///                     }
         ///         }
         ///                  
         /// </remarks>
@@ -45,8 +51,8 @@ namespace ApiForum.Controllers
         [HttpPost]
         public async Task<IActionResult> CadastrarResposta([FromBody] JObject resposta, [FromHeader] string autorToken)
         {
-            try {
-
+            try 
+            {
                var Core = new RespostaCore(JsonConvert.DeserializeObject<Resposta>(resposta.ToString()), _contexto);
                var result = await Core.CadastrarResposta(autorToken);
                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);

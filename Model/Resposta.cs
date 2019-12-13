@@ -11,6 +11,7 @@ namespace Model
         public Usuario Usuario { get; set; }
         [ForeignKey("Usuarios")]
         public Guid? UsuarioId { get; set; }
+        public Anexo Anexo { get; set; }
         public bool VisualizarMensagem { get; set; } = true;
     }
 }

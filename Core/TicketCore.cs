@@ -164,7 +164,9 @@ namespace Core
             {
                 _ticket = await _serviceContext.Tickets.SingleAsync(t => t.NumeroTicket == long.Parse(NumeroTicketQueVem) && t.ClienteId == Guid.Parse(Usertoken) || t.NumeroTicket == long.Parse(NumeroTicketQueVem) && t.AtendenteId == Guid.Parse(Usertoken)&&t.VisualizarTicket);
 
-                _ticket.LstRespostas = await _serviceContext.Respostas.Include(c => c.Usuario).Where(c => c.TicketId == _ticket.Id).OrderBy(e => e.DataCadastro).ToListAsync();
+                _ticket.LstRespostas = await (from a in _serviceContext.Respostas join c in _serviceContext.Usuarios on a.UsuarioId equals c.Id join b in _serviceContext.Anexos on a.Id equals b.RespostaId select new Resposta { DataCadastro = a.DataCadastro, Mensagem = a.Mensagem, Usuario = new Usuario { Email = c.Email, Nome = c.Nome, Tipo = c.Tipo },Anexo=new Anexo {NomeArquivo=b.NomeArquivo,Id=b.Id } }).ToListAsync();
+                    
+                    //_serviceContext.Respostas.Include(c => c.Usuario).Where(c => c.TicketId == _ticket.Id).OrderBy(e => e.DataCadastro).ToListAsync();
 
                 return new Retorno { Status = true, Resultado = _mapper.Map<TicketRetorno>(_ticket) };
             }

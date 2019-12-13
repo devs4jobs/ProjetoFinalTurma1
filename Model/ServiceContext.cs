@@ -5,11 +5,12 @@ namespace Model
 {
     public class ServiceContext : DbContext
     {
-        public ServiceContext(DbContextOptions options) : base(options) {}
+        public ServiceContext(DbContextOptions options) : base(options) { }
 
-       public DbSet<Ticket> Tickets { get; set; }
-       public DbSet<Usuario> Usuarios { get; set; }
-       public DbSet<Resposta> Respostas { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Resposta> Respostas { get; set; }
+        public DbSet<Anexo> Anexos { get; set; }
 
         // override do metodo de salvar para realizar o to upper em nas propriedades do usuario
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

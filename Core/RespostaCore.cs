@@ -31,6 +31,19 @@ namespace Core
                 RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
             });
 
+            RuleSet("CadastroAnexo", () =>
+            {
+                if (_resposta.Mensagem != null)
+                {
+                    RuleFor(e => e.Mensagem).NotEmpty().WithMessage("A mensagem não pode ser enviada sem conteúdo.");
+                    RuleFor(e => e.Mensagem).MinimumLength(2).WithMessage("O tamanho da mensagem deve ser de no minimo 2 caracteres");
+                }
+                RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
+                RuleFor(e => e.Anexo.NomeArquivo).NotNull().WithMessage("Nome não pode ser nulo");
+                RuleFor(e => e.Anexo.Extensão).NotNull().WithMessage("Deve conter a Extensão");
+                RuleFor(e => e.Anexo.Arquivo).NotEmpty().WithMessage("Anexo não pode vir vazio");
+            });
+
         }
 
         /// <summary>
@@ -45,9 +58,12 @@ namespace Core
 
             _resposta.UsuarioId = Guid.Parse(tokenAutor);
 
-            var validar = this.Validate(_resposta,ruleSet:"Cadastro");
+            var Rule = _resposta.Anexo != null ? "CadastroAnexo" : "Cadastro";
+
+            var validar = this.Validate(_resposta, ruleSet: Rule);
             if (!validar.IsValid)
                 return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
+
 
             try
             {

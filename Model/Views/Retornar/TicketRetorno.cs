@@ -5,6 +5,7 @@ namespace Model
     public class TicketRetorno
     {
         public Guid Id { get; set; }
+        public DateTime DataCadastro { get; set; }
         public long NumeroTicket { get; set; }
         public Status? Status { get; set; }
         public string Titulo { get; set; }
