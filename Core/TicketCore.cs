@@ -59,19 +59,18 @@ namespace Core
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+                return new Retorno {  Resultado = new List<string> { "Autorização Negada!" } };
 
             _ticket.ClienteId = Guid.Parse(Usertoken);
 
             //verifico ticket se é valido.
             var validar = Validate(_ticket);
-            if (!validar.IsValid)
-                return new Retorno { Status = false, Resultado = validar.Errors.Select(e => e.ErrorMessage).ToList() };
+            if (!validar.IsValid) return new Retorno { Resultado = validar.Errors.Select(e => e.ErrorMessage).ToList() };
 
             //busco o cliente na base e verifico.
             var cliente = await _serviceContext.Usuarios.SingleOrDefaultAsync(u => u.Id == _ticket.ClienteId);
 
-            if (cliente.Tipo != "CLIENTE") return new Retorno { Status = false, Resultado = new List<string> { "Usuário não é do tipo cliente" } };
+            if (cliente.Tipo != "CLIENTE") return new Retorno {  Resultado = new List<string> { "Usuário não é do tipo cliente" } };
 
             //Atribuição do numero do ticket
             _ticket.NumeroTicket = ConvertNumeroTickets();
@@ -100,10 +99,10 @@ namespace Core
                 //busco pelo ticket e efetuo as validacoes
                 _ticket = await _serviceContext.Tickets.Include(o => o.LstRespostas).SingleAsync(t => t.Id == Guid.Parse(TicketID));
 
-                if (_ticket.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Status = false, Resultado = new List<string> { "Usuario não é o dono do ticket." } };
+                if (_ticket.ClienteId != Guid.Parse(Usertoken)) return new Retorno { Resultado = new List<string> { "Usuario não é o dono do ticket." } };
 
                 var Validate = this.Validate(ticketView, ruleSet: "Atualizar");
-                if (!Validate.IsValid) return new Retorno { Status = false, Resultado = Validate.Errors.Select(x => x.ErrorMessage) };
+                if (!Validate.IsValid) return new Retorno { Resultado = Validate.Errors.Select(x => x.ErrorMessage) };
 
                 // mapeando o retorno
                 _mapper.Map(ticketView, _ticket);
@@ -113,7 +112,7 @@ namespace Core
             }
             catch (Exception)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não identificado." } };
+                return new Retorno { Resultado = new List<string> { "Ticket não identificado." } };
             }
         }
 
@@ -129,13 +128,13 @@ namespace Core
                 return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
             try
             {
-                _ticket = await _serviceContext.Tickets.Include(c=>c.Cliente).Include(c => c.LstRespostas).SingleAsync(t => t.Id == Guid.Parse(TicketID));
+                _ticket = await _serviceContext.Tickets.Include(c => c.LstRespostas).SingleAsync(t => t.Id == Guid.Parse(TicketID));
 
                 //vejo se o cliente que ta logado é o mesmo que está públicou o ticket.
-                if (Guid.Parse(Usertoken) != _ticket.ClienteId) return new Retorno { Status = false, Resultado = new List<string> { "Usuário não pode deletar esse ticket, pois não é quem postou o mesmo!" } };
+                if (Guid.Parse(Usertoken) != _ticket.ClienteId) return new Retorno { Resultado = new List<string> { "Usuário não pode deletar esse ticket, pois não é quem postou o mesmo!" } };
 
                 //tento excluir o ticket e salvar as  alterações.
-                if (_ticket.LstRespostas.Count() != 0) return new Retorno { Status = false, Resultado = new List<string> { "Não é possivel remover este ticket, pois ele ja tem respostas!" } };
+                if (_ticket.LstRespostas.Count() != 0) return new Retorno { Resultado = new List<string> { "Não é possivel remover este ticket, pois ele ja tem respostas!" } };
 
                 // Remoção do ticket
                 _ticket.VisualizarTicket = false;
@@ -145,7 +144,7 @@ namespace Core
             }
             catch (Exception)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "ticket não identificado!" } };
+                return new Retorno { Resultado = new List<string> { "ticket não identificado!" } };
             }
         }
 
@@ -158,13 +157,21 @@ namespace Core
         {
 
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+                return new Retorno { Resultado = new List<string> { "Autorização Negada!" } };
             
             try
             {
                 _ticket = await _serviceContext.Tickets.SingleAsync(t => t.NumeroTicket == long.Parse(NumeroTicketQueVem) && t.ClienteId == Guid.Parse(Usertoken) || t.NumeroTicket == long.Parse(NumeroTicketQueVem) && t.AtendenteId == Guid.Parse(Usertoken)&&t.VisualizarTicket);
 
-                _ticket.LstRespostas = await (from a in _serviceContext.Respostas join c in _serviceContext.Usuarios on a.UsuarioId equals c.Id join b in _serviceContext.Anexos on a.Id equals b.RespostaId select new Resposta { DataCadastro = a.DataCadastro, Mensagem = a.Mensagem, Usuario = new Usuario { Email = c.Email, Nome = c.Nome, Tipo = c.Tipo },Anexo=new Anexo {NomeArquivo=b.NomeArquivo,Id=b.Id } }).ToListAsync();
+                _ticket.LstRespostas = await (from a in _serviceContext.Respostas join c in _serviceContext.Usuarios on a.UsuarioId equals c.Id 
+                                              join b in _serviceContext.Anexos on a.Id equals b.RespostaId 
+                                              select new Resposta
+                                              {
+                                                  DataCadastro = a.DataCadastro,
+                                                  Mensagem = a.Mensagem,
+                                                  Usuario = new Usuario { Email = c.Email, Nome = c.Nome, Tipo = c.Tipo },
+                                                  Anexo = new Anexo { NomeArquivo = b.NomeArquivo }
+                                              }).ToListAsync();
                     
                     //_serviceContext.Respostas.Include(c => c.Usuario).Where(c => c.TicketId == _ticket.Id).OrderBy(e => e.DataCadastro).ToListAsync();
 
@@ -172,11 +179,11 @@ namespace Core
             }
             catch (FormatException)
             {
-                 return new Retorno { Status = false, Resultado = new List<string> { "Número do ticket incorreto!" } };
+                 return new Retorno { Resultado = new List<string> { "Número do ticket incorreto!" } };
             }
             catch (ArgumentNullException)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
+                return new Retorno { Resultado = new List<string> { "Ticket não existe" } };
             }
         }
 
@@ -192,7 +199,7 @@ namespace Core
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+                return new Retorno { Resultado = new List<string> { "Autorização Negada!" } };
 
             //busco pelo usuario e vejo se ele existe.
             var usuario = await _serviceContext.Usuarios.SingleAsync(u => u.Id == Guid.Parse(Usertoken));
@@ -218,7 +225,7 @@ namespace Core
                         break;
 
                     default:
-                        return new Retorno { Status = false, Resultado = new List<string> { "Temos três status entre as opções; Aberto, andamento e concluido." } };
+                        return new Retorno { Resultado = new List<string> { "Temos três status entre as opções; Aberto, andamento e concluido." } };
                 }
             }
             else if (usuario.Tipo == "CLIENTE")
@@ -240,7 +247,7 @@ namespace Core
                         break;
 
                     default:
-                        return new Retorno { Status = false, Resultado = new List<string> { "Temos três status entre as opções; Aberto, andamento e concluido." } };
+                        return new Retorno { Resultado = new List<string> { "Temos três status entre as opções; Aberto, andamento e concluido." } };
                 }
             }
             else
@@ -257,7 +264,7 @@ namespace Core
                         Tickets = await _serviceContext.Tickets.Where(x => x.Status == Status.ABERTO).ToListAsync();
                         break;
                     default:
-                        return new Retorno { Status = false, Resultado = new List<string> { "Temos três status entre as opções; Aberto, andamento e concluido." } };
+                        return new Retorno { Resultado = new List<string> { "Temos três status entre as opções; Aberto, andamento e concluido." } };
                 }
             }
 
@@ -267,12 +274,12 @@ namespace Core
             {
                 Paginacao.Paginar(NumeroPagina, QuantidadeRegistro, Tickets.Count());
                 var listaPaginada = Tickets.OrderByDescending(d => d.DataCadastro).Skip((NumeroPagina - 1) * QuantidadeRegistro).Take(QuantidadeRegistro).ToList();
-                return listaPaginada.Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { "Não foi possível realizar a paginação." } }
+                return listaPaginada.Count() == 0 ? new Retorno { Resultado = new List<string> { "Não foi possível realizar a paginação." } }
                 : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(listaPaginada) };
             }
             Paginacao.Paginar(1, 10, Tickets.Count());
 
-            return _mapper.Map<List<TicketRetorno>>(Tickets.Take(10)).Count() == 0 ? new Retorno { Status = false, Resultado = new List<string> { $"Você não tem tickets {StatusAtual} no momento!" } }
+            return _mapper.Map<List<TicketRetorno>>(Tickets.Take(10)).Count() == 0 ? new Retorno { Resultado = new List<string> { $"Você não tem tickets {StatusAtual} no momento!" } }
             : new Retorno { Status = true, Paginacao = Paginacao, Resultado = _mapper.Map<List<TicketRetorno>>(Tickets.Take(10)) };
         }
 
@@ -285,18 +292,18 @@ namespace Core
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(Usertoken, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+                return new Retorno { Resultado = new List<string> { "Autorização Negada!" } };
 
             try
             {
                 //verifico se tem um usuário na base com ID informado e o tipo dele é atendente.
                 var atendente = await _serviceContext.Usuarios.SingleOrDefaultAsync(u => u.Id == Guid.Parse(Usertoken) && u.Tipo == "ATENDENTE");
-                if (atendente == null) return new Retorno { Status = false, Resultado = new List<string> { "Atendente não identificado!" } };
+                if (atendente == null) return new Retorno { Resultado = new List<string> { "Atendente não identificado!" } };
 
                 //busco e verifico se o ticket solicitado existe na base de dados.
                 _ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(t => t.NumeroTicket == long.Parse(numeroTicket));
 
-                if (_ticket.AtendenteId != null) return new Retorno { Status = false, Resultado = new List<string> { "ticket já tem um atendente." } };
+                if (_ticket.AtendenteId != null) return new Retorno { Resultado = new List<string> { "ticket já tem um atendente." } };
 
                 //passo o valor para o ticket
                 _ticket.AtendenteId = atendente.Id;
@@ -308,11 +315,11 @@ namespace Core
             }
             catch (FormatException)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "Numero do ticket formato incorreto" } };
+                return new Retorno { Resultado = new List<string> { "Numero do ticket formato incorreto" } };
             }
             catch (NullReferenceException)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe!!!" } };
+                return new Retorno { Resultado = new List<string> { "Ticket não existe!!!" } };
             }
         }
 
@@ -325,10 +332,10 @@ namespace Core
         {
             //verifico login.
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização Negada!" } };
+                return new Retorno { Resultado = new List<string> { "Autorização Negada!" } };
 
             if (!Enum.IsDefined(typeof(Avaliacao), Fechamento.Avaliacao))
-                return new Retorno { Status = false, Resultado = new List<string> { "Avaliação não válida!" } };
+                return new Retorno { Resultado = new List<string> { "Avaliação não válida!" } };
             try
             {
                 // busco e valido se este ticket em especifico é valido.
@@ -336,19 +343,19 @@ namespace Core
 
                 // validações para a realização do fechamento
                 var Validate = this.Validate(_ticket, ruleSet: "Fechar");
-                if (!Validate.IsValid) return new Retorno { Status = false, Resultado = Validate.Errors.Select(c => c.ErrorMessage) };
+                if (!Validate.IsValid) return new Retorno { Resultado = Validate.Errors.Select(c => c.ErrorMessage) };
 
                 // atribuo e fecho o ticket
                 _ticket.Status = Status.FECHADO;
-                _ticket.Avaliacao = Enum.Parse<Avaliacao>(Fechamento.Avaliacao);
-
+                _ticket.Avaliacao = Fechamento.Avaliacao;
+                    //Enum.Parse<Avaliacao>(Fechamento.Avaliacao);
                 await _serviceContext.SaveChangesAsync();
 
                 return new Retorno { Status = true, Resultado = new List<string> { "ticket fechado com sucesso!" } };
             }
             catch (Exception)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não encontrado" } };
+                return new Retorno { Resultado = new List<string> { "Ticket não encontrado" } };
             }
         }
 

@@ -46,9 +46,9 @@ namespace ApiForum.Controllers
                 var Core = new UsuarioCore(JsonConvert.DeserializeObject<Usuario>(usuarioView.ToString()), _contexto);
                 var result = await Core.CadastrarUsuario();
 
-                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", result) : (IActionResult)Ok(result);
+                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}/Autenticar", result) : (IActionResult)BadRequest(result);
             }
-            catch (Exception) {  return Ok(new Retorno { Status = false, Resultado = new List<string> { "As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });}
+            catch (Exception) {  return BadRequest(new Retorno { Status = false, Resultado = new List<string> { "As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } });}
         }
 
         /// <summary>
@@ -73,9 +73,9 @@ namespace ApiForum.Controllers
                 var Core = new UsuarioCore(_contexto);
                 var result = await Core.LogarUsuario(JsonConvert.DeserializeObject<Usuario>(loginView.ToString()));
 
-                return result.Status ? Ok(result) : Ok(result);
+                return result.Status ? Ok(result) : (IActionResult)BadRequest(result);
             }
-            catch (Exception) {  return Ok(new Retorno { Status = false, Resultado = new List<string> { "As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } }); }
+            catch (Exception) {  return BadRequest(new Retorno { Status = false, Resultado = new List<string> { "As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } }); }
         }
     }
 }

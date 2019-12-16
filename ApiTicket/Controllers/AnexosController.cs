@@ -18,17 +18,22 @@ namespace ApiTicket.Controllers
 
         public AnexosController(ServiceContext service) => Service = service;
 
+        /// <summary>
+        /// Buscar Arquivo
+        /// </summary>
+        /// <param name="id">Identificador do Arquivo</param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<IActionResult> BuscarArquivo(string id)
         {
             var Core = new AnexoCore(Service);
-            var (extensao, Arquivo) = await Core.BuscarArquivo(id);
+            var Anexo = await Core.BuscarArquivo(id);
 
-            if (Arquivo != null)
+            if (Anexo != null)
             {
-                HttpContext.Response.ContentType = $"{(extensao=="jpg"||extensao=="jpeg"||extensao=="png"?"image":"application")}/{extensao}";
-                HttpContext.Response.Headers.Add("content-length", Arquivo.Length.ToString());
-                HttpContext.Response.Body.Write(Arquivo, 0, Arquivo.Length);
+                HttpContext.Response.ContentType = "application/octet-stream";
+                HttpContext.Response.Headers.Add("content-length", Anexo.Arquivo.Length.ToString());
+                HttpContext.Response.Body.Write(Anexo.Arquivo, 0, Anexo.Arquivo.Length);
             }
 
             return new ContentResult();

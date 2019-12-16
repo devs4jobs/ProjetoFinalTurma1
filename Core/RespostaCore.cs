@@ -40,7 +40,6 @@ namespace Core
                 }
                 RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
                 RuleFor(e => e.Anexo.NomeArquivo).NotNull().WithMessage("Nome não pode ser nulo");
-                RuleFor(e => e.Anexo.Extensão).NotNull().WithMessage("Deve conter a Extensão");
                 RuleFor(e => e.Anexo.Arquivo).NotEmpty().WithMessage("Anexo não pode vir vazio");
             });
 
@@ -54,27 +53,23 @@ namespace Core
         {
             // o teste para a validacao do usuario
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
+                return new Retorno { Resultado = new List<string> { "Autorização negada!" } };
 
             _resposta.UsuarioId = Guid.Parse(tokenAutor);
 
             var Rule = _resposta.Anexo != null ? "CadastroAnexo" : "Cadastro";
 
             var validar = this.Validate(_resposta, ruleSet: Rule);
-            if (!validar.IsValid)
-                return new Retorno { Status = false, Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
-
+            if (!validar.IsValid)  return new Retorno { Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
 
             try
             {
                 // vejo se o ticket é valido
                 var Ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(x => x.Id == _resposta.TicketId);
 
-                if (Ticket.Status == Status.FECHADO)
-                    return new Retorno { Status = false, Resultado = new List<string> { "Não é possível responder um ticket fechado!" } };
+                if (Ticket.Status == Status.FECHADO) return new Retorno { Resultado = new List<string> { "Não é possível responder um ticket fechado!" } };
 
-                if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)
-                    return new Retorno { Status = false, Resultado = new List<string> { "Usuário não está vinculado a esse ticket" } };
+                if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)  return new Retorno { Resultado = new List<string> { "Usuário não está vinculado a esse ticket" } };
 
                 // defino o status da resposta baseando se na pessoa que esta enviando 
                 _resposta.Usuario = await _serviceContext.Usuarios.SingleOrDefaultAsync(x => x.Id == _resposta.UsuarioId);
@@ -88,7 +83,7 @@ namespace Core
             }
             catch (NullReferenceException)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "Ticket não existe" } };
+                return new Retorno { Resultado = new List<string> { "Ticket não existe" } };
             }
         }
     
@@ -102,18 +97,16 @@ namespace Core
         {
             // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
+                return new Retorno { Resultado = new List<string> { "Autorização negada!" } };
 
             try
             {
                 // busco pela resposta e realiza as validações
                 _resposta = await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == Guid.Parse(RespostaId));
 
-                if (_resposta.UsuarioId != Guid.Parse(tokenAutor))
-                    return new Retorno { Status = false, Resultado = new List<string> { "Autorização para editar negada, só o autor da resposta pode edita-la" } };
+                if (_resposta.UsuarioId != Guid.Parse(tokenAutor))  return new Retorno { Resultado = new List<string> { "Autorização para editar negada, só o autor da resposta pode edita-la" } };
 
-                if (respostaQueVem.Mensagem.Length < 10)
-                    return new Retorno { Status = false, Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
+                if (respostaQueVem.Mensagem.Length < 10)  return new Retorno { Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
 
                 _mapper.Map(respostaQueVem, _resposta);
 
@@ -123,11 +116,11 @@ namespace Core
             }
             catch (FormatException)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "RespostaId Formato incorreta" } };
+                return new Retorno { Resultado = new List<string> { "RespostaId Formato incorreta" } };
             }
             catch (NullReferenceException)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "Resposta não existe" } };
+                return new Retorno { Resultado = new List<string> { "Resposta não existe" } };
             }
         }
 
@@ -140,15 +133,14 @@ namespace Core
         {
             // realizo as validacoes  do usuario e em seguida do ticket
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
-                return new Retorno { Status = false, Resultado = new List<string> { "Autorização negada!" } };
+                return new Retorno { Resultado = new List<string> { "Autorização negada!" } };
 
             try
             {
                 //procuro pela resposta em questao e aplico as validacoes
                 _resposta = await _serviceContext.Respostas.SingleOrDefaultAsync(c => c.Id == Guid.Parse(RespostaId));
 
-                if (_resposta.UsuarioId != Guid.Parse(tokenAutor))
-                    return new Retorno { Status = false, Resultado = new List<string> { "Autorização para deletar negada, só o autor da resposta pode deletá-la" } };
+                if (_resposta.UsuarioId != Guid.Parse(tokenAutor))  return new Retorno { Resultado = new List<string> { "Autorização para deletar negada, só o autor da resposta pode deletá-la" } };
 
                 //salvo a remoção 
                 _resposta.VisualizarMensagem = false;
@@ -158,11 +150,11 @@ namespace Core
             }
             catch (FormatException)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "RespostaId Formato incorreto" } };
+                return new Retorno { Resultado = new List<string> { "RespostaId Formato incorreto" } };
             }
             catch (NullReferenceException)
             {
-                return new Retorno { Status = false, Resultado = new List<string> { "Resposta não existe " } };
+                return new Retorno { Resultado = new List<string> { "Resposta não existe " } };
             }
         }
     }

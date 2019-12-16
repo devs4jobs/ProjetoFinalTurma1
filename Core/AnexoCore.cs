@@ -13,13 +13,9 @@ namespace Core
     {
         private ServiceContext _ServiceContext { get; set; }
 
-        private Anexo _Anexo { get; set; }
         public AnexoCore(ServiceContext serviceContext) => _ServiceContext = serviceContext;
         
-        public async Task<(string extensao,byte[] Arquivo)> BuscarArquivo(string id)
-        {
-           _Anexo = await _ServiceContext.Anexos.FirstAsync(x => x.Id == Guid.Parse(id));
-            return (_Anexo.Extensão, _Anexo.Arquivo);
-        }
+        public async Task<Anexo> BuscarArquivo(string id)=> await _ServiceContext.Anexos.FirstAsync(x => x.NomeArquivo == id);
+        
     }
 }
