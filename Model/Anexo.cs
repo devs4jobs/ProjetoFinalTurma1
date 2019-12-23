@@ -5,7 +5,7 @@ namespace Model
 {
     public class Anexo
     {
-        public DateTime DataCadastro { get; set; } = DateTime.Now;
+        public DateTime? DataCadastro { get; set; } = DateTime.Now;
         [Key]
         public string NomeArquivo { get; set; }
         public byte[] Arquivo { get; set; }

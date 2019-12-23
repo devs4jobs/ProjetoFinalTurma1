@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Core.Util;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,17 @@ namespace Core
         private ServiceContext _ServiceContext { get; set; }
 
         public AnexoCore(ServiceContext serviceContext) => _ServiceContext = serviceContext;
-        
-        public async Task<Anexo> BuscarArquivo(string id)=> await _ServiceContext.Anexos.FirstAsync(x => x.NomeArquivo == id);
-        
+
+        public async Task<Retorno> BuscarArquivo(string id, string respostaId)
+        {
+            try 
+            {
+                return new Retorno { Status = true, Resultado = await _ServiceContext.Anexos.FirstAsync(x => x.NomeArquivo == id && x.RespostaId == Guid.Parse(respostaId)) };
+            }
+            catch (FormatException)
+            {
+                return new Retorno { Resultado = new List<string> { "RespostaId esta incorreto" } };
+            }
+        }
     }
 }

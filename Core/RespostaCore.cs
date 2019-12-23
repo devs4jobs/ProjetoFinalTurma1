@@ -14,12 +14,14 @@ namespace Core
         private Resposta _resposta { get; set; }
         private IMapper _mapper { get; set; }
         private ServiceContext _serviceContext { get; set; }
+
+        private List<string> Extensão { get; set; } = new List<string> { "jpg", "png", "gif", "pdf", "txt", "doc", "docx" };
+
+        #region Construtores
         public RespostaCore(ServiceContext ServiceContext, IMapper mapper) { _serviceContext = ServiceContext; _mapper = mapper; }
         public RespostaCore(ServiceContext ServiceContext) => _serviceContext = ServiceContext;
 
-
         public RespostaCore(Resposta RespostaQueVem, ServiceContext ServiceContext)
-
         {
             _serviceContext = ServiceContext;
             _resposta = RespostaQueVem;
@@ -39,11 +41,17 @@ namespace Core
                     RuleFor(e => e.Mensagem).MinimumLength(2).WithMessage("O tamanho da mensagem deve ser de no minimo 2 caracteres");
                 }
                 RuleFor(e => e.TicketId).NotNull().WithMessage("O ticketId nao pode ser nulo!");
-                RuleFor(e => e.Anexo.NomeArquivo).NotNull().WithMessage("Nome não pode ser nulo");
-                RuleFor(e => e.Anexo.Arquivo).NotEmpty().WithMessage("Anexo não pode vir vazio");
+                RuleFor(e => e.Anexo.NomeArquivo).NotNull().NotEmpty().WithMessage("Nome não pode ser nulo ou vazio");
+                RuleFor(e => e.Anexo.NomeArquivo).Must(x => !Extensão.Any(c => c == x.Substring(x.IndexOf('.')))).WithMessage("Extensao não aceita");
+                RuleFor(e => e.Anexo.Arquivo).NotNull().NotEmpty().WithMessage("Anexo não pode vir vazio");
+                RuleFor(e => e.Anexo.Arquivo).Must(x => x.Length < 1024 * 1024 * 100).WithMessage("Arquivo muito grande tamanho maximo de arquivo 100MB");
             });
 
         }
+
+        #endregion
+
+        #region Regras de Negocio
 
         /// <summary>
         /// Método para o cadastro de respostas
@@ -55,21 +63,19 @@ namespace Core
             if (!Autorizacao.ValidarUsuario(tokenAutor, _serviceContext))
                 return new Retorno { Resultado = new List<string> { "Autorização negada!" } };
 
-            _resposta.UsuarioId = Guid.Parse(tokenAutor);
-
-            var Rule = _resposta.Anexo != null ? "CadastroAnexo" : "Cadastro";
-
-            var validar = this.Validate(_resposta, ruleSet: Rule);
-            if (!validar.IsValid)  return new Retorno { Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
-
             try
             {
+                _resposta.UsuarioId = Guid.Parse(tokenAutor);
+                
+                var validar = this.Validate(_resposta, ruleSet: _resposta.Anexo != null ? "CadastroAnexo" : "Cadastro");
+                if (!validar.IsValid) return new Retorno { Resultado = validar.Errors.Select(a => a.ErrorMessage).ToList() };
+
                 // vejo se o ticket é valido
                 var Ticket = await _serviceContext.Tickets.SingleOrDefaultAsync(x => x.Id == _resposta.TicketId);
 
                 if (Ticket.Status == Status.FECHADO) return new Retorno { Resultado = new List<string> { "Não é possível responder um ticket fechado!" } };
 
-                if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId)  return new Retorno { Resultado = new List<string> { "Usuário não está vinculado a esse ticket" } };
+                if (Ticket.ClienteId != _resposta.UsuarioId && Ticket.AtendenteId != _resposta.UsuarioId) return new Retorno { Resultado = new List<string> { "Usuário não está vinculado a esse ticket" } };
 
                 // defino o status da resposta baseando se na pessoa que esta enviando 
                 _resposta.Usuario = await _serviceContext.Usuarios.SingleOrDefaultAsync(x => x.Id == _resposta.UsuarioId);
@@ -109,7 +115,6 @@ namespace Core
                 if (respostaQueVem.Mensagem.Length < 10)  return new Retorno { Resultado = new List<string> { "A mensagem deve ter no mínimo 10 caracteres para ser editada" } };
 
                 _mapper.Map(respostaQueVem, _resposta);
-
                 await _serviceContext.SaveChangesAsync();
 
                 return new Retorno { Status = true, Resultado = _mapper.Map<RespostaRetorno>(_resposta) };
@@ -157,5 +162,6 @@ namespace Core
                 return new Retorno { Resultado = new List<string> { "Resposta não existe " } };
             }
         }
+        #endregion
     }
 }

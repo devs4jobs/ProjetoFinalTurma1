@@ -12,10 +12,16 @@ namespace Model
         public DbSet<Resposta> Respostas { get; set; }
         public DbSet<Anexo> Anexos { get; set; }
 
-        // override do metodo de salvar para realizar o to upper em nas propriedades do usuario
+        // Declaração da chave composta
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Anexo>()
+                .HasKey(c =>new { c.NomeArquivo,c.RespostaId });
+        }
+
+        // Override do metodo de salvar para realizar o to upper em nas propriedades do usuario
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-
             foreach (var Tipo in ChangeTracker.Entries<Usuario>())
                 if (Tipo.State == EntityState.Modified || Tipo.State == EntityState.Added)
                 {

@@ -46,9 +46,9 @@ namespace ApiForum.Controllers
             {
                 var Core = new TicketCore(JsonConvert.DeserializeObject<Ticket>(ticket.ToString()), _contexto, _Mapper);
                 var result = await Core.CadastrarTicket(autorToken);
-                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)BadRequest(result);
+                return result.Status ? Created($"{HttpContext.Request.Host}{HttpContext.Request.Path}", result) : (IActionResult)Ok(result);
             }
-            catch (Exception) { return BadRequest(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } }); }
+            catch (Exception) { return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger" } }); }
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace ApiForum.Controllers
         {
             var Core = new TicketCore(_contexto);
             var result = await Core.TomarPosseTicket(autorToken, numeroTicket);
-            return result.Status ? Ok(result) : (IActionResult)BadRequest(result);
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace ApiForum.Controllers
         {
             var Core = new TicketCore(_Mapper, _contexto);
             var result = await Core.BuscarTicketPorNumeroDoTicket(autorToken, NumeroTicket);
-            return result.Status ? Ok(result) : (IActionResult)BadRequest(result);
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace ApiForum.Controllers
         {
             var Core = new TicketCore(_Mapper, _contexto);
             var result = await Core.BuscarTodosTickets(autorToken, numeroPagina, quantidadePagina, StatusAtual);
-            return result.Status ? Ok(result) : (IActionResult)BadRequest(result);
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace ApiForum.Controllers
             {
                 var Core = new TicketCore(_Mapper, _contexto);
                 var result = await Core.AtualizarTicket(autorToken, TicketID, JsonConvert.DeserializeObject<Ticket>(ticket.ToString()));
-                return result.Status ? Accepted(result) : (IActionResult)BadRequest(result);
+                return result.Status ? Accepted(result) : (IActionResult)Ok(result);
             }
             catch (Exception){  return Ok(new Retorno { Status = false, Resultado = new List<string> { $"As Informações foram passadas de forma errada, por favor siga o exemplo do Swagger"} }); }
         }
@@ -132,7 +132,7 @@ namespace ApiForum.Controllers
         {
             var Core = new TicketCore(_contexto);
             var result = await Core.DeletarTicket(autorToken, TicketID);
-            return result.Status ? Ok(result) : (IActionResult)BadRequest(result);
+            return result.Status ? Ok(result) : Ok(result);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace ApiForum.Controllers
         {
             var Core = new TicketCore(_contexto);
             var result = await Core.FecharTicket(autorToken, Avaliacao);
-            return result.Status ? Ok(result) : (IActionResult)BadRequest(result);
+            return result.Status ? Ok(result) : Ok(result);
         }
     }
 }

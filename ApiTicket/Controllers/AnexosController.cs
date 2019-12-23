@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Core;
+using Core.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
@@ -21,22 +23,34 @@ namespace ApiTicket.Controllers
         /// <summary>
         /// Buscar Arquivo
         /// </summary>
-        /// <param name="id">Identificador do Arquivo</param>
+        /// <param name="RespostaId"></param>
+        /// <param name="NomeArquivo">Identificador do Arquivo</param>
         /// <returns></returns>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> BuscarArquivo(string id)
+        [HttpGet("{NomeArquivo}")]
+        public async Task<IActionResult> BuscarArquivo([FromHeader] string RespostaId,string NomeArquivo)
         {
-            var Core = new AnexoCore(Service);
-            var Anexo = await Core.BuscarArquivo(id);
-
-            if (Anexo != null)
+            try
             {
-                HttpContext.Response.ContentType = "application/octet-stream";
-                HttpContext.Response.Headers.Add("content-length", Anexo.Arquivo.Length.ToString());
-                HttpContext.Response.Body.Write(Anexo.Arquivo, 0, Anexo.Arquivo.Length);
-            }
+                var Core = new AnexoCore(Service);
+                var Anexo = await Core.BuscarArquivo(NomeArquivo,RespostaId);
 
-            return new ContentResult();
+                if (!Anexo.Status) return Ok(Anexo);
+
+                HttpContext.Response.ContentType = NomeArquivo.Substring(NomeArquivo.IndexOf('.')) == "jpg" ? "application/octet-stream" : "image/jpeg";
+                HttpContext.Response.Headers.Add("content-length", Anexo.Resultado.Arquivo.Length.ToString());
+                HttpContext.Response.Body.Write(Anexo.Resultado.Arquivo, 0, Anexo.Resultado.Arquivo.Length);
+
+
+                return new ContentResult();
+            }
+            catch (NullReferenceException)
+            {
+                return Ok(new Retorno { Resultado = new List<string> { "Arquivo não encontrado" } });
+            }
+            catch (Exception)
+            {
+                return Ok(new Retorno { Resultado = new List<string> { "Erro ao recuperar o Arquivo, Peça para ser enviado novamente" } });
+            }
         }
     }
 }

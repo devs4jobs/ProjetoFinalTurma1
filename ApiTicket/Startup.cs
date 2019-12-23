@@ -10,7 +10,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
 using System.IO;
 using System;
-using Microsoft.Extensions.Options;
+using System.Linq;
 
 namespace ApiTicket
 {
@@ -31,7 +31,6 @@ namespace ApiTicket
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             });
             services.AddDbContext<ServiceContext>(options => options.UseSqlServer(Configuration.GetConnectionString("StringConexao")), ServiceLifetime.Scoped);
-
             services.AddSwaggerGen(opt =>
             {
 
@@ -75,19 +74,19 @@ namespace ApiTicket
 
                 cfg.CreateMap<Ticket, TicketRetorno>()
                     .ForMember(dest => dest.Atendente, opt => opt.Condition(ori => ori.Atendente != null))
-                    .ForMember(dest => dest.Cliente, opt => opt.Condition(ori => ori.Cliente != null));
+                    .ForMember(dest => dest.Cliente, opt => opt.Condition(ori => ori.Cliente != null))
+                    .ForMember(dest => dest.LstRespostas, opt => opt.Condition(ori => ori.LstRespostas!=null ));
 
                 //mapeamento das respostas.
-                cfg.CreateMap<Resposta, RespostaRetorno>();
+                cfg.CreateMap<Resposta, RespostaRetorno>()
+                .ForMember(d=>d.Anexo,Options=>Options.Condition(ori=>ori.Anexo.Arquivo!=null));
                 cfg.CreateMap<Resposta, Resposta>()
                     .ForMember(d => d.DataCadastro, opt => opt.Ignore())
                     .ForMember(d => d.Id, opt => opt.Ignore())
                     .ForMember(d=>d.TicketId,opt=>opt.Ignore())
                     .ForMember(d=>d.UsuarioId,opt=>opt.Ignore())
                     .ForMember(dest => dest.Mensagem, opt => opt.Condition(ori => ori.Mensagem != null));
-
-                cfg.CreateMap<Anexo, AnexoRetorno>();
-
+    
                 });
             IMapper mapper = config.CreateMapper();
             services.AddSingleton(mapper);

@@ -13,6 +13,7 @@ namespace Core
         private Usuario _usuario { get; set; }
         public ServiceContext _dbcontext { get; set; }
 
+        #region Contrutores
         public UsuarioCore(ServiceContext Context) => _dbcontext = Context;
 
         public UsuarioCore(Usuario Usuario, ServiceContext Context)
@@ -30,7 +31,9 @@ namespace Core
             RuleFor(u => u.Tipo).NotNull().WithMessage("O tipo do Usuário deve ser informado");
             if (_usuario.Tipo != null) RuleFor(u => u.Tipo).Must(u => u.ToUpper() == "CLIENTE" || u.ToUpper() == "ATENDENTE").WithMessage("Tipo deve ser cliente ou atendente");
         }
+        #endregion
 
+        #region Metodos Usuarios
         /// <summary>
         /// Método para realizar o cadastro de um usuario
         /// </summary>
@@ -56,8 +59,8 @@ namespace Core
         {
             try 
             {
-                //Vejo se o login esta correto, se nao ja retorno uma mensagem.
-                _usuario = await _dbcontext.Usuarios.SingleOrDefaultAsync(u => u.Email == loginView.Email);
+                //Vejo se o Email esta correto, se nao ja retorno uma mensagem.
+                var _usuario =  await _dbcontext.Usuarios.SingleAsync(u => u.Email == loginView.Email);
            
                 return _usuario.Senha != loginView.Senha?  new Retorno { Resultado = new List<string> { "Senha inválida!" } }
                 : new Retorno { Status = true, Resultado = new { TokenUsuario = _usuario.Id, _usuario.Nome, _usuario.Tipo } };
@@ -67,5 +70,7 @@ namespace Core
                 return new Retorno { Resultado = new List<string> { "Email não encontrado!" } };
             }
         }
+
+        #endregion
     }
 }
